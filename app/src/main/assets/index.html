@@ -1,0 +1,1610 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050913">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hunter System">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>html{background:#050913}body{margin:0}</style>
+<title>Hunter System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  /* Layout: sticky system header and tab strip over one centred column of square, bracket-cornered panels.
+     The only glowing element is the level numeral; everything else stays quiet. Committed dark single theme. */
+  --void:#050913;
+  --panel:#0a1426;
+  --panel2:#0e1c34;
+  --line:#1b3c69;
+  --glow:#4cb4ff;
+  --ink:#dbe9ff;
+  --mute:#8aa0c2;
+  --good:#46e0a0;
+  --warn:#f5c04a;
+  --crit:#ff6b7a;
+  --viol:#a48cff;
+  --f-display:'Chakra Petch','Rajdhani',system-ui,sans-serif;
+  --f-body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--void);
+  background-image:
+    radial-gradient(900px 420px at 50% -140px,rgba(76,180,255,.16),transparent 70%),
+    linear-gradient(rgba(76,180,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(76,180,255,.035) 1px,transparent 1px);
+  background-size:auto,32px 32px,32px 32px;
+  color:var(--ink);
+  font:15px/1.5 var(--f-body);
+  padding-block:0 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--void);z-index:30}
+.wrap{max-width:980px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-size:12px;color:var(--mute)}
+b{font-weight:600}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:linear-gradient(var(--void) 88%,transparent);padding:12px 0 4px}
+.brand{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.logo{font:700 20px/1 var(--f-display);letter-spacing:.28em;color:#fff;text-shadow:0 0 14px rgba(76,180,255,.55)}
+.sync{font:500 11px var(--f-mono);color:var(--mute)}
+.clockrow{display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:6px}
+.clockrow #clock{color:var(--ink)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0 6px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;background:transparent;border:1px solid var(--line);padding:8px 16px;font:600 12px var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:var(--mute);cursor:pointer;min-height:40px}
+.tab:hover{color:var(--ink);border-color:var(--glow)}
+.tab[aria-current="page"]{color:#04101f;background:var(--glow);border-color:var(--glow)}
+
+/* panels */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:0 14px;align-items:start}
+.panel{position:relative;margin-top:14px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(14,28,52,.9),rgba(10,20,38,.94));box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.panel::before,.panel::after{content:"";position:absolute;width:12px;height:12px;border:2px solid var(--glow);pointer-events:none}
+.panel::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.panel::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.panel.pen{border-color:#6b2a36}
+.panel.pen::before,.panel.pen::after{border-color:var(--crit)}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);min-width:0}
+.pt{font:600 12px/1.2 var(--f-display);letter-spacing:.24em;text-transform:uppercase;color:var(--glow)}
+.pen .pt{color:var(--crit)}
+.pb{padding:14px;min-width:0}
+.sysbox{margin-top:14px;border:1px solid var(--glow);outline:1px solid rgba(76,180,255,.35);outline-offset:3px;background:rgba(8,18,36,.92);padding:12px 14px}
+.sysbox.crit{border-color:var(--crit);outline-color:rgba(255,107,122,.35)}
+.sysbox.good{border-color:var(--good);outline-color:rgba(70,224,160,.35)}
+.sysbox.warn{border-color:var(--warn);outline-color:rgba(245,192,74,.35)}
+.sysh{font:600 11px var(--f-display);letter-spacing:.32em;color:var(--glow);margin-bottom:4px}
+.sysbox.crit .sysh{color:var(--crit)}.sysbox.good .sysh{color:var(--good)}.sysbox.warn .sysh{color:var(--warn)}
+.sysbox p{margin:0}
+.sysbox .row{margin-top:10px}
+
+/* status */
+.idrow{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.lv{display:flex;flex-direction:column;align-items:center;min-width:92px}
+.lvl{font:700 68px/1 var(--f-display);color:#fff;text-shadow:0 0 20px var(--glow),0 0 3px var(--glow)}
+.lvt{font:600 11px var(--f-display);letter-spacing:.3em;color:var(--glow)}
+.idinfo{flex:1 1 200px;min-width:0}
+.kv{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 14px;margin:12px 0 0}
+.kv div{min-width:0}
+.kv dt{font:500 11px var(--f-mono);color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.kv dd{margin:0;font:600 16px var(--f-display);overflow-wrap:anywhere}
+.kv .rank{font-size:22px;color:var(--glow)}
+.lab{display:block;font:500 11px var(--f-mono);color:var(--mute);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.bar{height:10px;background:#071022;border:1px solid var(--line);position:relative;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#2a7fd0,var(--glow));transition:width .4s}
+.bar.good i{background:linear-gradient(90deg,#1f9b6c,var(--good))}
+.bar.crit i{background:linear-gradient(90deg,#b23a49,var(--crit))}
+.prog{display:flex;align-items:center;gap:12px;margin-top:12px}
+.stat{display:grid;grid-template-columns:44px 1fr 34px;gap:10px;align-items:center;margin-top:12px}
+.stat .ab{font:700 14px var(--f-display);letter-spacing:.1em}
+.stat .nm{font:400 12px var(--f-body);color:var(--mute);display:block;letter-spacing:0}
+.stat .v{font:600 16px var(--f-display);text-align:right;font-variant-numeric:tabular-nums}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.mini div{border:1px solid var(--line);padding:8px 10px;background:#071022}
+.mini .n{font:700 22px var(--f-display);font-variant-numeric:tabular-nums}
+.mini .l{font:500 11px var(--f-mono);color:var(--mute);text-transform:uppercase}
+
+/* forms and buttons */
+.inp,.ta,.sel{width:100%;background:#071022;border:1px solid var(--line);color:var(--ink);padding:9px 10px;min-height:40px}
+.ta{min-height:76px;resize:vertical}
+.btn{font:600 13px var(--f-display);letter-spacing:.14em;text-transform:uppercase;background:transparent;border:1px solid var(--glow);color:var(--ink);padding:9px 16px;min-height:40px;cursor:pointer}
+.btn:hover{background:rgba(76,180,255,.14)}
+.btn.primary{background:var(--glow);color:#04101f}
+.btn.primary:hover{background:#7cc8ff}
+.btn.danger{border-color:var(--crit);color:var(--crit)}
+.btn.danger:hover{background:rgba(255,107,122,.14)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:6px 10px;min-height:32px;font-size:11px}
+.lnk{background:none;border:0;color:var(--mute);font:500 11px var(--f-mono);text-decoration:underline;cursor:pointer;padding:4px 0}
+.lnk:hover{color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.form{display:grid;gap:10px}
+.form .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px}
+.segs{display:inline-flex;border:1px solid var(--line)}
+.seg{background:transparent;border:0;padding:8px 14px;font:600 12px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);cursor:pointer;min-height:38px}
+.seg.on{background:var(--glow);color:#04101f}
+.hint{color:var(--mute);font-size:13px;margin:10px 0 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{font:500 11px var(--f-mono);border:1px solid var(--line);padding:2px 7px;color:var(--mute)}
+.chip.now{border-color:var(--glow);color:var(--glow)}
+.chip.good{border-color:var(--good);color:var(--good)}
+.chip.crit{border-color:var(--crit);color:var(--crit)}
+.chip.warn{border-color:var(--warn);color:var(--warn)}
+
+/* quests */
+.qlist{display:grid;gap:8px;margin-top:12px}
+.qrow{display:grid;grid-template-columns:32px 1fr auto;gap:12px;align-items:start;border:1px solid var(--line);background:#071022;padding:10px 12px}
+.qrow.now{box-shadow:inset 0 0 0 1px var(--glow)}
+.qrow.done{opacity:.62}
+.qrow.done .qt{text-decoration:line-through;text-decoration-color:var(--mute)}
+.qrow.dim{border-style:dashed}
+.chk{width:30px;height:30px;border:2px solid var(--glow);background:transparent;color:#04101f;font:700 16px/1 var(--f-display);cursor:pointer;padding:0}
+.qrow.done .chk{background:var(--good);border-color:var(--good)}
+.qmain{min-width:0}
+.qt{font:600 15px var(--f-display);letter-spacing:.04em}
+.qd{color:var(--mute);font-size:13px;margin-top:2px}
+.qx{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font:500 12px var(--f-mono);color:var(--glow);white-space:nowrap}
+.sub{font:600 11px var(--f-display);letter-spacing:.24em;text-transform:uppercase;color:var(--mute);margin:16px 0 0}
+.big{font:700 44px/1 var(--f-mono);letter-spacing:.04em;font-variant-numeric:tabular-nums;color:#fff}
+
+/* goals, events, log */
+.card{border:1px solid var(--line);background:#071022;padding:12px;margin-top:10px}
+.card h3{margin:0;font:600 16px var(--f-display);letter-spacing:.04em;overflow-wrap:anywhere}
+.card p{margin:4px 0 0;color:var(--mute);font-size:14px}
+.ms{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;margin-top:8px}
+.ms .chk{width:24px;height:24px;font-size:13px}
+.ms.done span{color:var(--mute);text-decoration:line-through}
+.log{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:8px 0;border-bottom:1px solid rgba(27,60,105,.6);font-size:14px}
+.log time{font:400 11px var(--f-mono);color:var(--mute);padding-top:2px}
+
+/* mind */
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.scale button{background:#071022;border:1px solid var(--line);min-height:42px;font:600 16px var(--f-display);cursor:pointer}
+.scale button[aria-pressed="true"]{background:var(--glow);color:#04101f;border-color:var(--glow)}
+.scale-l{display:flex;justify-content:space-between;font:400 11px var(--f-mono);color:var(--mute);margin-top:4px}
+.tagrow{display:flex;gap:6px;flex-wrap:wrap}
+.tagbtn{background:transparent;border:1px solid var(--line);padding:6px 12px;font:500 12px var(--f-mono);cursor:pointer;color:var(--mute);min-height:34px}
+.tagbtn[aria-pressed="true"]{border-color:var(--glow);color:var(--glow);background:rgba(76,180,255,.12)}
+.chart{width:100%;height:auto;display:block}
+.chart text{font:400 10px var(--f-mono);fill:var(--mute)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .s-m{stroke:var(--glow);fill:var(--glow)}
+.chart .s-e{stroke:var(--warn);fill:var(--warn)}
+.chart .s-s{stroke:var(--viol);fill:var(--viol)}
+.chart path{fill:none;stroke-width:2;stroke-linejoin:round}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:8px;font:400 12px var(--f-mono);color:var(--mute)}
+.legend svg{width:30px;height:8px;vertical-align:middle;margin-right:6px}
+.orbwrap{display:grid;place-items:center;padding:18px 0 8px;min-height:230px}
+.orb{width:150px;height:150px;border-radius:50%;border:2px solid var(--glow);box-shadow:0 0 28px rgba(76,180,255,.35),inset 0 0 24px rgba(76,180,255,.2);transform:scale(.55);transition:transform 4s ease-in-out;display:grid;place-items:center;text-align:center}
+.orb .ol{font:600 14px var(--f-display);letter-spacing:.2em;text-transform:uppercase}
+.orb .oc{font:500 22px var(--f-mono);font-variant-numeric:tabular-nums}
+.gr{display:grid;gap:8px;margin-top:10px}
+.gr label{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;font-size:14px;cursor:pointer}
+.gr input{width:20px;height:20px;accent-color:var(--glow)}
+
+/* overlays */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:min(92vw,520px);background:rgba(6,14,28,.96);border:1px solid var(--glow);padding:10px 14px;font-size:14px;z-index:40;box-shadow:0 0 24px rgba(76,180,255,.3)}
+.toast .sysh{display:inline;margin-right:8px}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(2,6,14,.82);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.modal .panel{margin:0;max-width:420px;width:100%}
+.modal .lvl{font-size:88px}
+.center{text-align:center}
+.chk.st{display:inline-grid;place-items:center;cursor:default}
+.chk.off{border-color:var(--line)}
+.qrow.m-active{box-shadow:inset 0 0 0 1px var(--glow)}
+.qrow.m-done{opacity:.7}
+.qrow.m-locked{opacity:.78}
+.qrow.m-missed{opacity:.5;border-style:dashed}
+.card.sug{border-color:var(--glow);box-shadow:inset 0 0 0 1px var(--glow)}
+.banner{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));width:min(94vw,520px);z-index:45;background:rgba(6,14,28,.97);border:1px solid var(--glow);outline:1px solid rgba(76,180,255,.4);outline-offset:3px;padding:12px 14px;box-shadow:0 0 30px rgba(76,180,255,.45);animation:pop .35s ease-out}
+.banner p{margin:4px 0 10px;color:var(--ink)}
+@keyframes pop{from{transform:translateX(-50%) translateY(-24px);opacity:0}to{transform:translateX(-50%);opacity:1}}
+@media (prefers-reduced-motion:reduce){.banner{animation:none}}
+.foot{margin-top:26px;color:var(--mute);font-size:12px}
+.foot a,.pb a{color:var(--glow)}
+@media (max-width:520px){
+  .qrow{grid-template-columns:30px 1fr}
+  .qx{grid-column:2;flex-direction:row;align-items:center;gap:12px}
+  .log li{grid-template-columns:1fr}
+  .big{font-size:38px}
+}
+@media (prefers-reduced-motion:reduce){
+  .orb{transition:none}
+  .bar i{transition:none}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="logo">HUNTER SYSTEM</span><span class="sync" id="sync">Saved on this device</span></div>
+    <div class="clockrow"><span id="clock" class="mono"></span><span id="dateTxt" class="mono"></span><span class="mono">Day resets in <b id="resetIn"></b></span></div>
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab" data-act="tab" data-v="status">Status</button>
+      <button class="tab" data-act="tab" data-v="missions">Missions</button>
+      <button class="tab" data-act="tab" data-v="quests">Quests</button>
+      <button class="tab" data-act="tab" data-v="raids">Raids</button>
+      <button class="tab" data-act="tab" data-v="skills">Skills</button>
+      <button class="tab" data-act="tab" data-v="special">Special</button>
+      <button class="tab" data-act="tab" data-v="gates">Gates</button>
+      <button class="tab" data-act="tab" data-v="events">Events</button>
+      <button class="tab" data-act="tab" data-v="mind">Mind</button>
+      <button class="tab" data-act="tab" data-v="hall">Hall</button>
+    </nav>
+  </header>
+  <main id="app"></main>
+  <p class="foot">A game-style tracker for habits, goals and mood. It is a self-improvement tool, not medical care or a substitute for professional support.</p>
+</div>
+<div id="banner" class="banner" role="alert" hidden></div>
+<div id="toast" class="toast" hidden></div>
+<div id="modal"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+var $=function(s,r){return (r||document).querySelector(s)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var uid=function(){return Math.random().toString(36).slice(2,9)};
+var pad=function(n){return String(n).padStart(2,'0')};
+var dkey=function(d){d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+var addDays=function(k,n){var p=k.split('-').map(Number);return dkey(new Date(p[0],p[1]-1,p[2]+n))};
+var diffDays=function(a,b){var pa=a.split('-').map(Number),pb=b.split('-').map(Number);return Math.round((new Date(pb[0],pb[1]-1,pb[2])-new Date(pa[0],pa[1]-1,pa[2]))/864e5)};
+var fmtT=function(t){return new Date(t).toLocaleString([], {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})};
+var pick=function(a){return a[Math.floor(Math.random()*a.length)]};
+
+/* ---------- game data ---------- */
+var STAT={str:{ab:'STR',n:'Body'},vit:{ab:'VIT',n:'Recovery'},agi:{ab:'AGI',n:'Discipline'},int:{ab:'INT',n:'Focus'},sen:{ab:'SEN',n:'Awareness'}};
+var WIN={am:'Morning',day:'Daytime',pm:'Evening',any:'Anytime'};
+var CATSTAT={Mind:'sen',Body:'str',Skill:'int',Life:'agi'};
+var DEFAULT_QUESTS=[
+  {id:'q_breathe',title:'Breathing Protocol',desc:'Two minutes of slow breathing. The Safe Room in Mind can guide you.',stat:'sen',xp:15,tier:'min',w:'am'},
+  {id:'q_move',title:'Light Movement',desc:'Ten minutes of walking or stretching. Outside if you can.',stat:'str',xp:20,tier:'min',w:'am'},
+  {id:'q_fuel',title:'Hydrate and Fuel',desc:'Drink water and eat a real meal. The body is the base stat.',stat:'vit',xp:15,tier:'min',w:'day'},
+  {id:'q_focus',title:'Focus Dungeon',desc:'25 minutes of deep work or study. The timer on this page counts it.',stat:'int',xp:30,tier:'core',w:'day'},
+  {id:'q_journal',title:'Mind Log',desc:'Write three lines: how I feel, what I need, one thing that went okay.',stat:'sen',xp:25,tier:'core',w:'pm'},
+  {id:'q_sleep',title:'Sleep Gate',desc:'Start winding down on time. Screens off 30 minutes before bed.',stat:'agi',xp:25,tier:'core',w:'pm'},
+  {id:'q_train',title:'Physical Training',desc:'20 to 30 minutes of exercise you can repeat tomorrow.',stat:'str',xp:30,tier:'bonus',w:'day'},
+  {id:'q_ally',title:'Ally Contact',desc:'Talk or message with one person. Connection counts as training.',stat:'sen',xp:20,tier:'bonus',w:'any'},
+  {id:'q_skill',title:'Skill Practice',desc:'15 minutes on a skill you want to grow.',stat:'int',xp:20,tier:'bonus',w:'any'},
+  {id:'q_tidy',title:'Clear the Room',desc:'Reset one small space so tomorrow starts easier.',stat:'agi',xp:15,tier:'bonus',w:'pm'}
+];
+var PEN_POOL=[
+  {title:'Reset Walk',desc:'Walk for 10 minutes, indoors or out. Slow is fine.'},
+  {title:'Clear the Deck',desc:'Tidy one surface for 5 minutes. Stop when the time is up.'},
+  {title:'Honest Debrief',desc:'Write three sentences: what got in the way, what you needed, what would help tomorrow. No blame.'},
+  {title:'Fuel Up',desc:'Drink a full glass of water and eat something with protein.'},
+  {title:'Reach Out',desc:'Send one message to someone you trust. Anything counts.'}
+];
+var EVENT_POOL=[
+  {kind:'quest',title:'Hidden Quest: Daylight',desc:'Step outside for 10 minutes. No scrolling while you do.',xp:25,stat:'vit'},
+  {kind:'quest',title:'Emergency Quest: Shoulder Reset',desc:'Stand up and do 60 seconds of slow neck and shoulder rolls.',xp:15,stat:'str'},
+  {kind:'buff',title:'Bonus Dungeon',desc:'All XP you earn for the rest of today is multiplied by 1.5.',mult:1.5},
+  {kind:'quest',title:'Ally Quest: Thank You',desc:'Send one person a short message thanking them for something specific.',xp:25,stat:'sen'},
+  {kind:'quest',title:'Name the Thought',desc:'Write down the loudest worry in your head, then one kinder way to say it.',xp:30,stat:'sen'},
+  {kind:'quest',title:'Mana Spring',desc:'Take three slow breaths with a long exhale, then drink a glass of water.',xp:15,stat:'sen'},
+  {kind:'quest',title:'Gate Appears: One Surface',desc:'Pick one surface (desk, table, sink) and clear it in 5 minutes.',xp:20,stat:'agi'},
+  {kind:'quest',title:'Sensory Scan',desc:'Name 3 things you can see, 2 you can hear and 1 you can feel. Take your time.',xp:15,stat:'sen'},
+  {kind:'quest',title:'Hidden Quest: Curiosity',desc:'Spend 10 minutes learning something you are curious about.',xp:25,stat:'int'},
+  {kind:'quest',title:'Lucky Draw: Guilt-Free Break',desc:'Do one small thing you enjoy for 10 minutes. Rest is allowed to be the quest.',xp:20,stat:'sen'}
+];
+
+/* ---------- v2 data: missions, raids, courage ladder, skills ---------- */
+/* No gym needed. Index = weekday, 0 is Sunday. */
+var TRAIN=[
+  'Gentle mobility: 10 minutes of slow stretching for hips, back and shoulders.',
+  'Brisk walk: 20 minutes at a pace that makes you slightly breathless.',
+  'Bodyweight circuit: 3 rounds of 10 squats, 8 wall or knee push-ups and a 20-second plank. Rest as needed.',
+  'Mobility and yoga: 10 to 15 minutes of stretching or a beginner yoga video.',
+  'Stairs or dance: 10 minutes of stairs, or dance to three songs.',
+  'Brisk walk: 20 minutes, ideally somewhere green.',
+  'Bodyweight circuit: 3 rounds of 12 squats, 6 to 10 push-ups (any version) and a 15-second plank.'
+];
+var DAYN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+/* a and b are minutes since midnight: the real-world window in which the mission can be completed */
+var MISSIONS=[
+  {id:'m_dawn',title:'Dawn Protocol',a:420,b:630,stat:'vit',xp:20,d:function(){return 'Drink a glass of water, open the curtains and stretch for 5 minutes. An easy start.'}},
+  {id:'m_sun',title:'Sunlight Patrol',a:660,b:840,stat:'str',xp:25,d:function(){return 'Walk outside for 15 minutes. Daylight and movement lift mood. Headphones are allowed.'}},
+  {id:'m_study',title:'Study Dungeon',a:900,b:1080,stat:'int',xp:35,d:function(){return 'One 25-minute study block on a single subject, then a 5-minute break. Use the Focus Dungeon timer in Quests.'+examNote()}},
+  {id:'m_train',title:'Home Training',a:1020,b:1230,stat:'str',xp:35,d:function(){var t=dayTypeNow();return t==='match'?'Match day: 10 minutes of light activation (easy jog, dynamic stretches) and your pre-match routine. Save your energy for the game.':t==='rest'?'Rest day: 15 minutes of easy walking and gentle stretching. Recovery is part of training.':TRAIN[new Date().getDay()]}},
+  {id:'m_skill',title:'Skill Forge',a:1110,b:1260,stat:'int',xp:30,d:function(){return '15 minutes on the skill of the day: '+skillOfDay().name+'. Small and regular beats long and rare.'}},
+  {id:'m_mind',title:'Mind Log',a:1230,b:1350,stat:'sen',xp:25,d:function(){return 'Log a check-in in the Mind tab. It completes this mission by itself.'}},
+  {id:'m_sleep',title:'Sleep Gate',a:1320,b:1439,stat:'agi',xp:25,d:function(){return 'Screens down and lights low. Aim to be in bed within the hour.'}},
+  {id:'m_social',title:'Courage Step',a:600,b:1260,stat:'sen',xp:40,social:1,d:function(){return ''}}
+];
+var CH_DEF={
+  walk7:{title:'Walk Streak',desc:'Walk for 10 minutes on 5 of the next 7 days.',type:'walk',mode:'daily',target:5,days:7,xp:120,stat:'str',manual:1},
+  study5:{title:'Study Rhythm',desc:'Do a 25-minute study block on 5 of the next 7 days.',type:'study',mode:'daily',target:5,days:7,xp:120,stat:'int',manual:1},
+  calm7:{title:'Calm Week',desc:'Do a check-in or a breathing round on 5 of the next 7 days.',type:'calm',mode:'daily',target:5,days:7,xp:100,stat:'sen',manual:1},
+  courage:{title:'Courage Fortnight',desc:'Complete 3 steps of the Courage Ladder within 14 days.',type:'courage',mode:'count',target:3,days:14,xp:150,stat:'sen',manual:0},
+  skill8:{title:'Skill Sprint',desc:'Practise a skill for at least 10 minutes on 8 of the next 14 days.',type:'skill',mode:'daily',target:8,days:14,xp:150,stat:'int',manual:1}
+};
+var BOSSES=[
+  {id:'golem',name:'Procrastination Golem',weak:['int'],hint:'Weak to focus, study and skill XP (1.5x damage).',max:350},
+  {id:'shade',name:'Doubt Shade',weak:['sen'],hint:'Weak to courage, calm and mind XP (1.5x damage).',max:350},
+  {id:'titan',name:'Sloth Titan',weak:['str','vit'],hint:'Weak to movement and recovery XP (1.5x damage).',max:350}
+];
+var LADDER=[
+  {id:'l1',t:'Make eye contact and nod at someone',s:'On a walk or in a shop. A small nod is enough.'},
+  {id:'l2',t:'Say a short greeting',s:'Say hi or thanks to a cashier, neighbour or classmate.'},
+  {id:'l3',t:'Message a classmate or friend first',s:'Send a simple message such as asking how their week is going.'},
+  {id:'l4',t:'Ask a shop worker a simple question',s:'For example where an item is. You can rehearse the sentence first.'},
+  {id:'l5',t:'Reply in a group chat or class chat',s:'One short message or a reaction counts.'},
+  {id:'l6',t:'Ask or answer one question in class',s:'Or email a teacher one question if speaking feels too big.'},
+  {id:'l7',t:'Chat for two minutes with someone',s:'Ask one open question and listen. Silence is fine.'},
+  {id:'l8',t:'Invite someone to study or have a drink',s:'A low-key invitation. A no is not a failure.'},
+  {id:'l9',t:'Share an opinion in a small group',s:'Keep it short. It does not have to be perfect.'},
+  {id:'l10',t:'Join a club, meetup or group event once',s:'Arrive, stay as long as you can, leave when you need to.'}
+];
+var SKILLS0=[{id:'study',name:'Study Technique'},{id:'lang',name:'Language'},{id:'code',name:'Coding and Tech'},{id:'comm',name:'Communication'},{id:'ball',name:'Football Technique'},{id:'read',name:'Reading'}];
+/* Special missions are not tied to the clock. rep: weekly resets on Monday, once is permanent. sk: [skill id, minutes] logged on completion. court: counts toward Courage challenges. */
+var SPECIAL=[
+  {id:'f_wall',cat:'Football',title:'Wall Passing Session',desc:'15 minutes of passing against a wall. Alternate feet, one touch then two touches.',stat:'agi',xp:40,rep:'weekly',sk:['ball',15]},
+  {id:'f_weak',cat:'Football',title:'Weak Foot Block',desc:'20 minutes using only your weaker foot for passing and shooting.',stat:'agi',xp:45,rep:'weekly',sk:['ball',20]},
+  {id:'f_juggle',cat:'Football',title:'Juggling Record',desc:'Set a juggling target, try for 10 minutes, then write down your new best.',stat:'agi',xp:35,rep:'weekly',sk:['ball',10]},
+  {id:'f_review',cat:'Football',title:'Match Review',desc:'After a game write 3 things that went well, 1 thing to improve and 1 mistake you forgive.',stat:'sen',xp:40,rep:'weekly'},
+  {id:'f_pre',cat:'Football',title:'Pre-Match Routine',desc:'Design a 5-minute routine: slow breathing, one cue word, picture your first good touch. Use it before your next game.',stat:'sen',xp:45,rep:'once'},
+  {id:'f_watch',cat:'Football',title:'Study a Player',desc:'Watch 15 minutes of a player in your position and note 3 habits to copy.',stat:'int',xp:35,rep:'weekly'},
+  {id:'f_recov',cat:'Football',title:'Recovery Night',desc:'After a hard session: stretch for 10 minutes, eat well and sleep early.',stat:'vit',xp:40,rep:'weekly'},
+  {id:'f_coach',cat:'Football',title:'Ask the Coach One Question',desc:'About your role or one thing to improve. Prepare the sentence first.',stat:'sen',xp:50,rep:'weekly',court:1},
+  {id:'s_plan',cat:'Student',title:'Weekly Study Plan',desc:'Write what you will study each day this week, with exam and deadline dates.',stat:'int',xp:40,rep:'weekly'},
+  {id:'s_paper',cat:'Student',title:'Past-Paper Session',desc:'Do one past paper or practice set under timed conditions, then mark it.',stat:'int',xp:50,rep:'weekly',sk:['study',45]},
+  {id:'s_teach',cat:'Student',title:'Teach It Back',desc:'Explain one topic out loud for 5 minutes without notes.',stat:'int',xp:35,rep:'weekly',sk:['study',10]},
+  {id:'s_teacher',cat:'Student',title:'Ask a Teacher',desc:'Ask or email a teacher one question about something you do not understand yet.',stat:'sen',xp:50,rep:'weekly',court:1},
+  {id:'s_notes',cat:'Student',title:'Tidy Notes',desc:'Organise your notes for one subject so you can find anything fast.',stat:'agi',xp:30,rep:'weekly'},
+  {id:'l_values',cat:'Life',title:'What Matters',desc:'Write the 5 things that matter most to you and one small action for each. This is your life compass.',stat:'sen',xp:60,rep:'once'},
+  {id:'l_vision',cat:'Life',title:'One-Year Letter',desc:'Write a letter to yourself one year from now: who you want to be and what changed.',stat:'sen',xp:60,rep:'once'},
+  {id:'l_money',cat:'Life',title:'Money Check',desc:'Write down what you spent this week and find one thing to save on.',stat:'int',xp:30,rep:'weekly'},
+  {id:'l_cook',cat:'Life',title:'Cook a Real Meal',desc:'Cook something simple from scratch and eat it without a screen.',stat:'vit',xp:35,rep:'weekly'},
+  {id:'l_learn',cat:'Life',title:'Learn Something New',desc:'30 minutes on a topic outside school and football. Write down 3 facts.',stat:'int',xp:40,rep:'weekly'},
+  {id:'l_thanks',cat:'Life',title:'Thank Someone',desc:'Message someone who helped you and say what it meant.',stat:'sen',xp:40,rep:'weekly',court:1},
+  {id:'l_offline',cat:'Life',title:'Offline Evening',desc:'Two hours with no phone. Walk, read or meet someone.',stat:'agi',xp:45,rep:'weekly'}
+];
+var BOOKS=[
+  {id:'b_habits',t:'Atomic Habits',a:'James Clear',st:'agi',d:'How tiny daily habits add up. Fits the quest system you already use.'},
+  {id:'b_mindset',t:'Mindset',a:'Carol Dweck',st:'int',d:'Why believing you can improve changes how you learn and handle setbacks.'},
+  {id:'b_stick',t:'Make It Stick',a:'Peter Brown, Henry Roediger and Mark McDaniel',st:'int',d:'Study methods that work, based on learning science. Made for students.'},
+  {id:'b_deep',t:'Deep Work',a:'Cal Newport',st:'int',d:'How to focus on hard things without distraction.'},
+  {id:'b_inner',t:'The Inner Game of Tennis',a:'W. Timothy Gallwey',st:'sen',d:'Quiet the inner critic and play freely. Useful for any sport, football included.'},
+  {id:'b_zlatan',t:'I Am Zlatan Ibrahimovic',a:'Zlatan Ibrahimovic with David Lagercrantz',st:'str',d:'A footballer\'s story of self-belief, mentality and where he came from.'},
+  {id:'b_feeling',t:'Feeling Good',a:'David D. Burns',st:'sen',d:'Practical tools for low mood and anxious thinking, based on cognitive therapy.'},
+  {id:'b_courage',t:'The Courage to Be Disliked',a:'Ichiro Kishimi and Fumitake Koga',st:'sen',d:'About freedom from other people\'s approval. Helpful for social anxiety.'},
+  {id:'b_quiet',t:'Quiet',a:'Susan Cain',st:'sen',d:'The strengths of quieter people and how to use them.'},
+  {id:'b_frankl',t:'Man\'s Search for Meaning',a:'Viktor E. Frankl',st:'sen',d:'Finding purpose through hard times. A short, serious read about what life is for.'},
+  {id:'b_meditations',t:'Meditations',a:'Marcus Aurelius',st:'sen',d:'Short notes on staying calm and acting well. Read a page at a time.'},
+  {id:'b_alchemist',t:'The Alchemist',a:'Paulo Coelho',st:'sen',d:'A short story about following your own path. An easy first read.'}
+];
+var RANKS=[{r:'E',L:1,n:'Newcomer'},{r:'D',L:4,n:'Apprentice'},{r:'C',L:8,n:'Adventurer'},{r:'B',L:15,n:'Veteran'},{r:'A',L:25,n:'Elite'},{r:'S',L:40,n:'Monarch'}];
+
+/* ---------- state ---------- */
+var LS='hunter-system-v1';
+function defaultState(){
+  var t=dkey();
+  return {
+    v:1,name:'Player',xp:0,sxp:{str:0,vit:0,agi:0,int:0,sen:0},
+    quests:DEFAULT_QUESTS.map(function(q){return Object.assign({},q)}),
+    done:{},dayClear:{},streak:0,best:0,passes:0,lastEval:addDays(t,-1),lowMode:false,
+    penalties:[],penCleared:0,
+    goals:[{id:'g_example',example:true,title:'Build a calm morning routine',cat:'Mind',created:t,due:'',bonus:0,
+      ms:[{id:'m1',t:'Wake at a steady time for 5 days',done:false,xp:0},{id:'m2',t:'Get 10 minutes of daylight before screens',done:false,xp:0},{id:'m3',t:'Keep the routine going for 3 weeks',done:false,xp:0}]}],
+    events:[],lastScan:0,buff:null,checkins:[],reframes:[],toolDay:{date:'',n:0},timer:null,
+    mdone:{},alerted:{},hday:{},eventAt:null,chals:[],boss:null,bossKills:0,records:[],
+    ladder:{steps:LADDER.map(function(x){return Object.assign({},x)}),log:[]},
+    skills:SKILLS0.map(function(x){return {id:x.id,name:x.name,min:0}}),
+    skillDay:{date:'',xp:0},ladDay:{date:'',n:0},alerts:{sound:true,vibrate:true,wake:false},
+    special:{},books:{},customBooks:[],skillsV2:1,customSpecial:[],dayType:{date:'',type:'train'},xpDay:{},exams:[],reportSeen:'',
+    log:[{t:Date.now(),m:'System online. Your first daily quests are ready.'}],updatedAt:0
+  };
+}
+function normalize(o){
+  var d=defaultState(),s=Object.assign(d,o);
+  s.sxp=Object.assign({str:0,vit:0,agi:0,int:0,sen:0},o.sxp||{});
+  ['done','dayClear'].forEach(function(k){if(!s[k]||typeof s[k]!=='object')s[k]={}});
+  ['quests','penalties','goals','events','checkins','log','reframes'].forEach(function(k){if(!Array.isArray(s[k]))s[k]=d[k]});
+  if(!s.toolDay)s.toolDay={date:'',n:0};
+  var f=defaultState();
+  ['mdone','alerted','hday','special','books','xpDay'].forEach(function(k){if(!s[k]||typeof s[k]!=='object'||Array.isArray(s[k]))s[k]={}});
+  ['chals','records','customBooks','exams','customSpecial'].forEach(function(k){if(!Array.isArray(s[k]))s[k]=[]});
+  if(!s.dayType||typeof s.dayType!=='object')s.dayType={date:'',type:'train'};
+  if(!s.ladder||!Array.isArray(s.ladder.steps)||!s.ladder.steps.length)s.ladder={steps:f.ladder.steps,log:(s.ladder&&Array.isArray(s.ladder.log))?s.ladder.log:[]};
+  if(!Array.isArray(s.ladder.log))s.ladder.log=[];
+  if(!Array.isArray(s.skills)||!s.skills.length)s.skills=f.skills;
+  if(!s.skillsV2){s.skillsV2=1;[{id:'ball',name:'Football Technique'},{id:'read',name:'Reading'}].forEach(function(x){if(!s.skills.some(function(y){return y.id===x.id}))s.skills.push({id:x.id,name:x.name,min:0})})}
+  s.alerts=Object.assign({sound:true,vibrate:true,wake:false},s.alerts||{});
+  ['skillDay','ladDay'].forEach(function(k){if(!s[k]||typeof s[k]!=='object')s[k]=f[k]});
+  return s;
+}
+function loadLocal(){try{var r=localStorage.getItem(LS);if(r){var o=JSON.parse(r);if(o&&o.v===1)return normalize(o)}}catch(e){}return defaultState()}
+var S=loadLocal();
+var UI={view:'status',modal:null,confirmReset:false,backup:'',banner:null,hf:'all',sf:'all',
+  cs:{title:'',cat:'Football',stat:'agi',xp:'35',rep:'weekly'},
+  bk:{open:null,note:'',title:'',author:''},ex:{name:'',date:''},
+  lad:{open:null,before:'5',after:'5',custom:''},sk:{name:''},
+  draft:{mood:3,energy:3,stress:3,tags:[],note:''},
+  gd:{title:'',cat:'Mind',ms:'',due:''},
+  qd:{title:'',tier:'core',stat:'agi',w:'any'},
+  rf:{a:'',b:'',c:''},gr:[false,false,false,false,false]};
+var curDay=dkey();
+var lastKey=null;
+
+/* ---------- persistence ---------- */
+var dbDoc=null,saving=false,dirty=false,saveTimer=null;
+function setSync(t){var e=$('#sync');if(e)e.textContent=t}
+function save(){
+  S.updatedAt=Date.now();
+  try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+  dirty=true;clearTimeout(saveTimer);saveTimer=setTimeout(flush,700);
+}
+function flush(){
+  if(!dbDoc||saving||!dirty)return;
+  saving=true;dirty=false;
+  dbDoc.set(JSON.parse(JSON.stringify(S))).then(function(){setSync('Synced to your account')},function(){setSync('Saved on this device')}).then(function(){saving=false;if(dirty)flush()});
+}
+function initDb(){
+  try{
+    if(!window.claude||typeof window.claude.use!=='function')return;
+    Promise.all([window.claude.use('db'),window.claude.use('user')]).then(function(r){
+      var db=r[0],user=r[1];
+      if(!db||!user)return;
+      return user.id().then(function(id){
+        if(!id)return;
+        var ref=db.collection('data/users/'+id).doc('system');
+        var to=new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'))},10000)});
+        return Promise.race([ref.get(),to]).then(function(snap){
+          var pushLocal=true;
+          if(snap.exists){
+            var remote=snap.data();
+            if(remote&&remote.v===1&&(remote.updatedAt||0)>(S.updatedAt||0)){
+              S=normalize(remote);pushLocal=false;
+              try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+            }
+          }
+          dbDoc=ref;setSync('Synced to your account');
+          boot();
+          if(pushLocal){dirty=true;flush()}
+        });
+      });
+    }).catch(function(){setSync('Saved on this device')});
+  }catch(e){}
+}
+
+/* ---------- levels ---------- */
+function need(L){return 100+25*(L-1)}
+function levelInfo(xp){var L=1,rem=xp;while(rem>=need(L)){rem-=need(L);L++}return {L:L,rem:rem,need:need(L)}}
+function rankOf(L){var r='E';RANKS.forEach(function(x){if(L>=x.L)r=x.r});return r}
+function titleOf(){
+  if(S.streak>=14)return 'Unbroken';
+  if(S.streak>=7)return 'Steadfast';
+  if(S.checkins.length>=14)return 'Self-Aware';
+  if(levelInfo(S.xp).L>=5)return 'Awakened';
+  return 'Newly Awakened';
+}
+function statVal(k){return 10+Math.floor((S.sxp[k]||0)/15)}
+function multNow(){return (S.buff&&S.buff.date===dkey())?S.buff.mult:1}
+
+function log(m){S.log.unshift({t:Date.now(),m:m});if(S.log.length>120)S.log.length=120}
+function toast(m){
+  var t=$('#toast');t.innerHTML='<span class="sysh">SYSTEM</span>'+esc(m);t.hidden=false;
+  clearTimeout(toast._t);toast._t=setTimeout(function(){t.hidden=true},3600);
+}
+function gain(xp,stat,noBoss){
+  var amt=Math.round(xp*multNow()),b=levelInfo(S.xp).L;
+  S.xp+=amt;if(stat)S.sxp[stat]=(S.sxp[stat]||0)+amt;dayXp(amt,stat);
+  var a=levelInfo(S.xp).L;
+  if(a>b){
+    var rb=rankOf(b),ra=rankOf(a);
+    UI.modal={from:b,to:a,rank:ra!==rb?ra:null};
+    log('Level up. You reached level '+a+(ra!==rb?' and rank '+ra:'')+'.');
+  }
+  if(!noBoss&&amt>0)hitBoss(amt,stat);
+  return amt;
+}
+function loseXp(amt,stat){
+  S.xp=Math.max(0,S.xp-amt);if(stat)S.sxp[stat]=Math.max(0,(S.sxp[stat]||0)-amt);dayXp(-amt,stat);
+  if(S.boss&&S.boss.status==='alive')S.boss.hp=Math.min(S.boss.max,S.boss.hp+amt);
+}
+function toolAward(xp,label){
+  var d=dkey();if(S.toolDay.date!==d)S.toolDay={date:d,n:0};
+  if(S.toolDay.n<3){S.toolDay.n++;var a=gain(xp,'sen');log(label+' complete. +'+a+' XP.');toast(label+' complete. +'+a+' XP');return a}
+  log(label+' complete. The daily XP cap for practices is reached; the practice still counts.');
+  toast(label+' complete. XP cap for today reached, well done anyway.');return 0;
+}
+
+/* ---------- quests ---------- */
+function isDone(id){var d=S.done[dkey()];return !!(d&&d[id]!=null)}
+function reqQuests(){return S.quests.filter(function(q){return !q.hidden&&(q.tier==='min'||(!S.lowMode&&q.tier==='core'))})}
+function winNow(){var h=new Date().getHours();return h<12?'am':h<18?'day':'pm'}
+function openPenalty(){return S.penalties.filter(function(p){return p.status==='open'})[0]||null}
+function recheck(){
+  var d=dkey(),req=reqQuests(),all=req.length>0&&req.every(function(q){return isDone(q.id)});
+  if(all&&!S.dayClear[d]){
+    S.streak++;S.best=Math.max(S.best,S.streak);
+    S.dayClear[d]=gain(20,'agi');
+    log('Daily quests cleared. Streak: '+S.streak+'. +'+S.dayClear[d]+' XP.');
+    toast('Daily quests cleared. Streak '+S.streak+'.');
+    if(S.streak%7===0&&S.passes<3){S.passes++;log('Recovery Pass earned.');}
+  }else if(!all&&S.dayClear[d]){
+    loseXp(S.dayClear[d],'agi');delete S.dayClear[d];S.streak=Math.max(0,S.streak-1);
+  }
+}
+function toggleQuest(id){
+  var d=dkey(),q=S.quests.find(function(x){return x.id===id});if(!q)return;
+  S.done[d]=S.done[d]||{};
+  if(S.done[d][id]!=null){var amt=S.done[d][id];delete S.done[d][id];loseXp(amt,q.stat)}
+  else{var g=gain(q.xp,q.stat);S.done[d][id]=g;log('Quest complete: '+q.title+'. +'+g+' XP.');toast(q.title+' complete. +'+g+' XP')}
+  recheck();save();render();
+}
+function evaluate(){
+  var today=dkey(),d=addDays(S.lastEval,1);
+  if(diffDays(S.lastEval,today)>15)d=addDays(today,-14);
+  var missed=0,lastMissed=null;
+  while(d<today){if(!S.dayClear[d]){missed++;lastMissed=d}d=addDays(d,1)}
+  if(missed>0){
+    var covered=Math.min(S.passes,missed);S.passes-=covered;
+    var rem=missed-covered;
+    if(covered>0)log('Recovery Pass used on '+covered+' missed day'+(covered>1?'s':'')+'. Streak protected.');
+    if(rem>0){
+      S.streak=0;
+      if(!openPenalty()){
+        var p=pick(PEN_POOL);
+        S.penalties.unshift({id:uid(),date:lastMissed,title:p.title,desc:p.desc,status:'open',rerolled:false});
+        if(S.penalties.length>30)S.penalties.length=30;
+        log('A day was missed. Penalty quest assigned: '+p.title+'. It is a repair task, no XP was taken.');
+      }
+    }
+  }
+  S.lastEval=addDays(today,-1);
+  ['done','dayClear'].forEach(function(k){Object.keys(S[k]).forEach(function(key){if(diffDays(key,today)>60)delete S[k][key]})});
+  S.events=S.events.filter(function(e){return diffDays(e.date,today)<=30});
+  S.chals.forEach(function(c){
+    var df=CH_DEF[c.key];
+    if(c.status==='active'&&c.end<today){c.status='failed';log('Challenge window ended: '+(df?df.title:'challenge')+'. No penalty. You can start it again.')}
+  });
+  S.chals=S.chals.filter(function(c){return c.status==='active'||diffDays(c.end,today)<=60});
+  S.exams.forEach(function(e){
+    if(!e.done&&e.date<today){e.done=true;var xa=gain(100,'int');addRec('special','Exam sat: '+e.name,xa,'int');log('Exam sat: '+e.name+'. +'+xa+' XP. Well done for showing up.')}
+  });
+  S.exams=S.exams.filter(function(e){return !e.done||diffDays(e.date,today)<=30});
+  ['mdone','hday','xpDay'].forEach(function(k){Object.keys(S[k]).forEach(function(key){if(diffDays(key,today)>60)delete S[k][key]})});
+}
+function ensureDailyEvent(){
+  var t=dkey();
+  if(!S.events.some(function(e){return e.date===t}))rollEvent(true);
+}
+function rollEvent(auto){
+  var t=dkey(),used=S.events.filter(function(e){return e.date===t}).map(function(e){return e.title});
+  var pool=EVENT_POOL.filter(function(e){return used.indexOf(e.title)<0});
+  if(!pool.length)return null;
+  var e=Object.assign({id:uid(),date:t,t:Date.now(),status:'new'},pick(pool));
+  S.events.unshift(e);
+  log((auto?'A hidden event appeared: ':'Scan found an event: ')+e.title+'.');
+  return e;
+}
+
+/* ---------- focus timer ---------- */
+function startFocus(){S.timer={end:Date.now()+25*60000,len:25};log('Focus Dungeon entered. 25 minutes.');save();render()}
+function stopFocus(){S.timer=null;log('Left the Focus Dungeon early. No penalty.');save();render()}
+function checkFocus(){
+  if(!S.timer||Date.now()<S.timer.end)return;
+  S.timer=null;var d=dkey();S.done[d]=S.done[d]||{};
+  var q=S.quests.find(function(x){return x.id==='q_focus'&&!x.hidden});
+  if(q&&!isDone('q_focus')){var a=gain(q.xp,q.stat);S.done[d].q_focus=a;log('Focus Dungeon cleared. +'+a+' XP.');toast('Focus Dungeon cleared. +'+a+' XP')}
+  else{var b=gain(20,'int');log('Focus Dungeon cleared. +'+b+' XP.');toast('Focus Dungeon cleared. +'+b+' XP')}
+  skillLog('study',25,true);chalTick('study');autoMission('m_study');examBump(nearestExam());
+  recheck();save();render();
+}
+
+/* ---------- mind ---------- */
+function dayAvgs(n){
+  var out=[],t=dkey();
+  for(var i=n-1;i>=0;i--){
+    var d=addDays(t,-i),cs=S.checkins.filter(function(c){return c.date===d});
+    if(!cs.length){out.push({d:d,m:null,e:null,s:null});continue}
+    var av=function(k){return cs.reduce(function(a,c){return a+c[k]},0)/cs.length};
+    out.push({d:d,m:av('mood'),e:av('energy'),s:av('stress')});
+  }
+  return out;
+}
+function avgOf(arr,k){var v=arr.map(function(x){return x[k]}).filter(function(x){return x!=null});return v.length?v.reduce(function(a,b){return a+b},0)/v.length:null}
+function chartSvg(){
+  var data=dayAvgs(14),n=data.length,W=360,H=200,L=26,R=10,T=12,B=24;
+  var X=function(i){return L+i*(W-L-R)/(n-1)},Y=function(v){return T+(5-v)*(H-T-B)/4};
+  var g='';
+  for(var v=1;v<=5;v++)g+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/><text x="'+(L-8)+'" y="'+(Y(v)+3)+'" text-anchor="end">'+v+'</text>';
+  for(var i=0;i<n;i++)if(i%3===0||i===n-1)g+='<text x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle">'+data[i].d.slice(8)+'</text>';
+  var series=[['m','s-m',''],['e','s-e','6 4'],['s','s-s','2 4']],out='';
+  series.forEach(function(sr){
+    var k=sr[0],path='',pen=false,last=-1;
+    data.forEach(function(p,i){
+      if(p[k]==null){pen=false;return}
+      path+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(p[k]).toFixed(1)+' ';pen=true;last=i;
+    });
+    if(!path)return;
+    out+='<g class="'+sr[1]+'"><path d="'+path+'"'+(sr[2]?' stroke-dasharray="'+sr[2]+'"':'')+'/>';
+    data.forEach(function(p,i){if(p[k]!=null)out+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p[k]).toFixed(1)+'" r="'+(i===last?5:2.5)+'" stroke="none"/>'});
+    out+='</g>';
+  });
+  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Mood, energy and stress over the last 14 days">'+g+out+'</svg>';
+}
+function trendLines(){
+  var a=dayAvgs(14),cur=a.slice(7),prev=a.slice(0,7);
+  var nc=cur.filter(function(x){return x.m!=null}).length;
+  if(nc<2)return '<p class="hint">Log check-ins on at least 2 days this week to unlock weekly averages.</p>';
+  var rows=[['m','Mood',true],['e','Energy',true],['s','Stress',false]].map(function(r){
+    var c=avgOf(cur,r[0]),p=avgOf(prev,r[0]),ch='';
+    if(c==null)return '';
+    if(p!=null){var df=c-p;ch=Math.abs(df)<0.15?'steady vs last week':(df>0?'up ':'down ')+Math.abs(df).toFixed(1)+' vs last week'}
+    return '<div class="chips"><span class="chip">'+r[1]+'</span><span>'+c.toFixed(1)+' / 5</span><span class="mono">'+ch+'</span></div>';
+  }).join('');
+  return rows;
+}
+function addCheckin(){
+  var d=dkey(),first=!S.checkins.some(function(c){return c.date===d}),dr=UI.draft;
+  S.checkins.push({id:uid(),date:d,t:Date.now(),mood:dr.mood,energy:dr.energy,stress:dr.stress,tags:dr.tags.slice(),note:dr.note.trim().slice(0,500)});
+  if(S.checkins.length>200)S.checkins.splice(0,S.checkins.length-200);
+  log('Check-in logged: mood '+dr.mood+', energy '+dr.energy+', stress '+dr.stress+'.');
+  chalTick('calm');autoMission('m_mind');
+  if(first){var a=gain(20,'sen');toast('Check-in logged. +'+a+' XP')}else toast('Check-in logged.');
+  UI.draft={mood:3,energy:3,stress:3,tags:[],note:''};
+  save();render();
+}
+
+/* breathing */
+var breath=null;
+var PH=[['Inhale',1],['Hold',1],['Exhale',.55],['Hold',.55]];
+function stopBreath(silent){
+  if(breath){clearInterval(breath.timer);breath=null}
+  if(!silent)render();
+}
+function startBreath(){
+  stopBreath(true);
+  breath={i:0,c:0,left:4,timer:null};
+  paintBreath();
+  breath.timer=setInterval(function(){
+    if(!breath)return;
+    breath.left--;
+    if(breath.left<=0){
+      breath.i++;
+      if(breath.i>=4){breath.i=0;breath.c++}
+      if(breath.c>=4){stopBreath(true);toolAward(15,'Box breathing');chalTick('calm');save();render();return}
+      breath.left=4;
+    }
+    paintBreath();
+  },1000);
+}
+function paintBreath(){
+  var o=$('#orb'),l=$('#orbL'),c=$('#orbC'),r=$('#orbR');
+  if(!o||!breath)return;
+  o.style.transform='scale('+PH[breath.i][1]+')';
+  l.textContent=PH[breath.i][0];c.textContent=breath.left;
+  if(r)r.textContent='Cycle '+(breath.c+1)+' of 4';
+}
+
+/* ---------- goals ---------- */
+function goalPct(g){var n=g.ms.length;return n?Math.round(g.ms.filter(function(m){return m.done}).length/n*100):0}
+function toggleMs(gid,mid){
+  var g=S.goals.find(function(x){return x.id===gid});if(!g)return;
+  var m=g.ms.find(function(x){return x.id===mid});if(!m)return;
+  var st=CATSTAT[g.cat]||'agi',wasAll=g.ms.every(function(x){return x.done});
+  if(m.done){m.done=false;loseXp(m.xp||0,st);m.xp=0}
+  else{m.done=true;m.xp=gain(40,st);log('Gate milestone cleared: '+m.t+'. +'+m.xp+' XP.');toast('Milestone cleared. +'+m.xp+' XP')}
+  var allNow=g.ms.length>0&&g.ms.every(function(x){return x.done});
+  if(allNow&&!wasAll){g.bonus=gain(100,st);addRec('gate',g.title,g.bonus,st);log('Gate cleared: '+g.title+'. +'+g.bonus+' XP.');toast('Gate cleared: '+g.title)}
+  if(!allNow&&wasAll&&g.bonus){loseXp(g.bonus,st);g.bonus=0}
+  save();render();
+}
+
+/* ---------- v2 logic: alerts, missions, boss, challenges, courage, skills ---------- */
+var lastSig='',actx=null,wl=null;
+function unlockAudio(){
+  try{var C=window.AudioContext||window.webkitAudioContext;if(C){if(!actx)actx=new C();if(actx.state==='suspended')actx.resume()}}catch(e){}
+  if(S.alerts.wake&&!wl)setWake(true);
+}
+document.addEventListener('pointerdown',unlockAudio,{passive:true});
+document.addEventListener('keydown',unlockAudio);
+function setWake(on){
+  if(on){
+    try{navigator.wakeLock.request('screen').then(function(l){wl=l;l.addEventListener('release',function(){wl=null})},function(){})}catch(e){}
+  }else if(wl){try{wl.release()}catch(e){}wl=null}
+}
+function ring(){
+  if(S.alerts.sound&&actx){
+    try{
+      var t0=actx.currentTime;
+      [0,0.55,1.1].forEach(function(o){[880,1175].forEach(function(fr,i){
+        var os=actx.createOscillator(),g=actx.createGain(),s=t0+o+i*0.17;
+        os.type='sine';os.frequency.value=fr;os.connect(g);g.connect(actx.destination);
+        g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(0.28,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+0.34);
+        os.start(s);os.stop(s+0.36);
+      })});
+    }catch(e){}
+  }
+  if(S.alerts.vibrate){try{if(navigator.vibrate)navigator.vibrate([250,120,250,120,500])}catch(e){}}
+}
+function paintBanner(){
+  var e=$('#banner');if(!e)return;var b=UI.banner;
+  if(!b){e.hidden=true;e.innerHTML='';return}
+  e.hidden=false;
+  e.innerHTML='<div class="sysh">SYSTEM ALERT</div><b>'+esc(b.title)+'</b><p>'+esc(b.body)+'</p><div class="row"><button class="btn primary sm" data-act="bgo" data-v="'+b.view+'">Open</button><button class="btn sm" data-act="bclose">Dismiss</button></div>';
+}
+function showBanner(title,body,view){
+  UI.banner={title:title,body:body,view:view};paintBanner();ring();
+  clearTimeout(showBanner._t);showBanner._t=setTimeout(function(){UI.banner=null;paintBanner()},90000);
+}
+
+function nowMin(){var n=new Date();return n.getHours()*60+n.getMinutes()+n.getSeconds()/60}
+function hm(m){return pad(Math.floor(m/60))+':'+pad(Math.floor(m%60))}
+function span(mins){var t=Math.max(1,Math.ceil(mins)),h=Math.floor(t/60),m=t%60;return h?h+'h '+pad(m)+'m':m+' min'}
+function mState(m){
+  var d=dkey(),n=nowMin();
+  if(m.social){if(S.ladder.log.some(function(l){return l.date===d}))return 'done'}
+  else if(S.mdone[d]&&S.mdone[d][m.id])return 'done';
+  return n<m.a?'locked':n<m.b+1?'active':'missed';
+}
+function mSig(){return MISSIONS.map(mState).join('')}
+function cdText(id){
+  var m=MISSIONS.find(function(x){return x.id===id});if(!m)return '';
+  var n=nowMin();return n<m.a?span(m.a-n):span(m.b+1-n);
+}
+function updateCountdowns(){
+  if(UI.view!=='missions'&&UI.view!=='status')return;
+  var sig=mSig();
+  if(sig!==lastSig){lastSig=sig;render();return}
+  document.querySelectorAll('[data-cd]').forEach(function(el){el.textContent=cdText(el.dataset.cd)});
+}
+function addRec(type,title,xp,stat){
+  S.records.unshift({t:Date.now(),date:dkey(),type:type,title:title,xp:xp||0,stat:stat||''});
+  if(S.records.length>300)S.records.length=300;
+}
+function completeMission(id,opt){
+  var m=MISSIONS.find(function(x){return x.id===id});if(!m||m.social)return;
+  var d=dkey(),st=mState(m);
+  if(st==='done')return;
+  if(st!=='active'){toast(st==='locked'?'This mission has not opened yet.':'This mission window has closed. No penalty. The next one is coming.');return}
+  S.mdone[d]=S.mdone[d]||{};
+  var amt=gain(m.xp,m.stat);S.mdone[d][id]={xp:amt,t:Date.now()};
+  addRec('mission',m.title,amt,m.stat);log('Mission complete: '+m.title+'. +'+amt+' XP.');
+  if(id==='m_study'){if(!(opt&&opt.skip))skillLog('study',25,true);chalTick('study')}
+  if(id==='m_skill'){skillLog(skillOfDay().id,15,true);chalTick('skill')}
+  if(id==='m_sun')chalTick('walk');
+  var cnt=MISSIONS.filter(function(x){return !x.social&&S.mdone[d][x.id]}).length;
+  if(cnt>=5&&!S.hday[d]){S.hday[d]=1;var b=gain(40,'agi');log('Day bonus: five missions cleared. +'+b+' XP.');toast('Day bonus: five missions cleared. +'+b+' XP')}
+  else toast(m.title+' complete. +'+amt+' XP');
+  save();render();
+}
+function autoMission(id){var m=MISSIONS.find(function(x){return x.id===id});if(m&&mState(m)==='active')completeMission(id,{skip:true})}
+
+function checkSchedule(){
+  var n=new Date(),d=dkey(),nm=n.getHours()*60+n.getMinutes(),open=[],ch=false;
+  if(!S.alerted[d]){S.alerted[d]={};ch=true;Object.keys(S.alerted).forEach(function(k){if(diffDays(k,d)>7)delete S.alerted[k]})}
+  MISSIONS.forEach(function(m){
+    if(m.social||nm<m.a||nm>m.b||S.alerted[d][m.id])return;
+    S.alerted[d][m.id]=1;ch=true;
+    if(!(S.mdone[d]&&S.mdone[d][m.id]))open.push(m);
+  });
+  if(!S.eventAt||S.eventAt.date!==d){
+    S.eventAt={date:d,ts:new Date(n.getFullYear(),n.getMonth(),n.getDate(),10+Math.floor(Math.random()*8),Math.floor(Math.random()*60)).getTime()};ch=true;
+  }
+  var rep=false;
+  if(n.getDay()===1&&S.reportSeen!==mondayOf(d)){
+    S.reportSeen=mondayOf(d);ch=true;
+    if(weekStats(1).xp>0){rep=true;log('Your weekly report is ready in the Hall.')}
+  }
+  var ev=null;
+  if(Date.now()>=S.eventAt.ts&&!S.events.some(function(e){return e.date===d})){ev=rollEvent(true);ch=true}
+  if(open.length){
+    var names=open.map(function(m){return m.title}).join(', ');
+    log('Mission window open: '+names+'.');
+    showBanner(open.length>1?open.length+' missions are open':'New mission: '+open[0].title,open.length>1?names+'.':open[0].d()+' Ends at '+hm(open[0].b)+'.','missions');
+  }else if(ev){showBanner('A hidden event appeared',ev.title+'. Open Events to accept or skip.','events')}
+  else if(rep){showBanner('Weekly report ready','Your last 7 days are summarised in the Hall.','hall')}
+  if(ch){save();if(started&&(UI.view==='missions'||UI.view==='events'||UI.view==='status'))render()}
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'){if(S.alerts.wake&&!wl)setWake(true);checkSchedule();tick(false)}
+});
+
+/* boss */
+function mondayOf(k){var p=k.split('-').map(Number),dt=new Date(p[0],p[1]-1,p[2]);return addDays(k,-((dt.getDay()+6)%7))}
+function bossDef(id){return BOSSES.find(function(b){return b.id===id})||BOSSES[0]}
+function ensureBoss(){
+  var wk=mondayOf(dkey());
+  if(S.boss&&S.boss.week===wk)return;
+  if(S.boss&&S.boss.status==='alive')log('The '+bossDef(S.boss.id).name+' retreated. A new boss has appeared.');
+  var idx=Math.floor(diffDays('2026-01-05',wk)/7);idx=((idx%BOSSES.length)+BOSSES.length)%BOSSES.length;
+  var b=BOSSES[idx];
+  S.boss={week:wk,id:b.id,hp:b.max,max:b.max,status:'alive',dmg:0};
+  log('Boss appeared: '+b.name+'. Defeat it before Sunday night.');
+}
+function hitBoss(amt,stat){
+  var b=S.boss;if(!b||b.status!=='alive')return;
+  var def=bossDef(b.id),dmg=Math.round(amt*(def.weak.indexOf(stat)>=0?1.5:1));
+  b.hp=Math.max(0,b.hp-dmg);b.dmg+=dmg;
+  if(b.hp===0){
+    b.status='dead';S.bossKills++;
+    var r=gain(120,null,true);addRec('boss',def.name,r);
+    log('Boss defeated: '+def.name+'. +'+r+' XP.');toast('Boss defeated: '+def.name+'. +'+r+' XP');
+  }
+}
+function raidMini(){
+  var b=S.boss;if(!b)return '';
+  var def=bossDef(b.id),pct=Math.round(b.hp/b.max*100);
+  return panel('Weekly Boss','<div class="qt">'+esc(def.name)+'</div><div class="chips"><span class="chip '+(b.status==='dead'?'good':'crit')+'">'+(b.status==='dead'?'DEFEATED':'ALIVE')+'</span></div><div class="prog"><div class="bar crit"><i style="width:'+pct+'%"></i></div><span class="mono">'+b.hp+' / '+b.max+' HP</span></div><div class="row" style="margin-top:12px"><button class="btn" data-act="tab" data-v="raids">Open Raids</button></div>');
+}
+
+/* challenges */
+function chalActive(){return S.chals.filter(function(c){return c.status==='active'})}
+function chalCheck(c){
+  var df=CH_DEF[c.key];if(!df||c.status!=='active'||c.count<df.target)return;
+  c.status='done';var a=gain(df.xp,df.stat);addRec('challenge',df.title,a,df.stat);
+  log('Challenge cleared: '+df.title+'. +'+a+' XP.');toast('Challenge cleared: '+df.title+'. +'+a+' XP');
+  showBanner('Challenge cleared',df.title+' is complete. +'+a+' XP.','raids');
+}
+function chalTick(type){
+  var d=dkey();
+  chalActive().forEach(function(c){
+    var df=CH_DEF[c.key];if(!df||df.type!==type)return;
+    if(df.mode==='daily'){if(c.days[d])return;c.days[d]=1;c.count++}else c.count++;
+    chalCheck(c);
+  });
+}
+
+/* skills */
+function skillOfDay(){var L=S.skills.length||1;return S.skills[Math.max(0,diffDays('2026-01-01',dkey()))%L]||SKILLS0[0]}
+function skLevel(s){return 1+Math.floor((s.min||0)/90)}
+function skillLog(id,min,quiet){
+  var s=S.skills.find(function(x){return x.id===id});if(!s)return;
+  var b=skLevel(s);s.min=(s.min||0)+min;var a=skLevel(s);
+  if(!quiet){
+    var d=dkey();if(S.skillDay.date!==d)S.skillDay={date:d,xp:0};
+    var x=Math.min(min,Math.max(0,60-S.skillDay.xp));
+    if(x>0){S.skillDay.xp+=x;var g=gain(x,id==='comm'?'sen':'int');toast(s.name+': +'+min+' min, +'+g+' XP')}
+    else toast(s.name+': +'+min+' min logged. Daily skill XP cap reached.');
+    if(min>=10)chalTick('skill');
+    if(id==='study'&&min>=20)chalTick('study');
+  }
+  if(a>b){log('Skill level up: '+s.name+' is now level '+a+'.');toast(s.name+' reached level '+a+'.')}
+}
+
+/* courage ladder */
+function ladCount(id){return S.ladder.log.filter(function(l){return l.step===id}).length}
+function ladCur(){
+  var st=S.ladder.steps;
+  for(var i=0;i<st.length;i++)if(ladCount(st[i].id)<2)return st[i].id;
+  return st.length?st[st.length-1].id:null;
+}
+function ladSave(id){
+  var st=S.ladder.steps.find(function(x){return x.id===id});if(!st)return;
+  var b=Number(UI.lad.before),a=Number(UI.lad.after),d=dkey();
+  S.ladder.log.unshift({step:id,t:Date.now(),date:d,before:b,after:a});
+  if(S.ladder.log.length>200)S.ladder.log.length=200;
+  if(S.ladDay.date!==d)S.ladDay={date:d,n:0};
+  var xp=0;if(S.ladDay.n<2){S.ladDay.n++;xp=gain(40,'sen')}
+  addRec('courage','Courage step: '+st.t,xp,'sen');chalTick('courage');
+  log('Courage step done: '+st.t+'. Anxiety '+b+' to '+a+'.'+(xp?' +'+xp+' XP.':''));
+  toast((a<b?'Anxiety went from '+b+' to '+a+'. That drop is the training working.':'Done. Anxiety can stay high at first. Repeating the step is what lowers it.')+(xp?' +'+xp+' XP':''));
+  UI.lad.open=null;save();render();
+}
+
+/* ---------- views ---------- */
+function panel(title,body,cls,right){
+  return '<section class="panel '+(cls||'')+'"><header class="ph"><span class="pt">'+title+'</span>'+(right||'')+'</header><div class="pb">'+body+'</div></section>';
+}
+function sysBox(msg,kind,extra){return '<div class="sysbox '+(kind||'')+'"><div class="sysh">SYSTEM</div><p>'+msg+'</p>'+(extra||'')+'</div>'}
+function greeting(h){return h<5?'Late night':h<12?'Good morning':h<18?'Good afternoon':'Good evening'}
+function notice(){
+  var h=new Date().getHours(),req=reqQuests(),dn=req.filter(function(q){return isDone(q.id)}).length,p=openPenalty();
+  if(p)return ['crit','A penalty quest is waiting: <b>'+esc(p.title)+'</b>. It is a repair task, not a punishment. Clear it in the Quests tab when you can.'];
+  if(req.length&&dn===req.length)return ['good','All required quests are cleared for today. Streak: '+S.streak+' day'+(S.streak===1?'':'s')+'. Rest is part of training.'];
+  var w=winNow(),next=req.filter(function(q){return !isDone(q.id)}).sort(function(a,b){return (a.w===w?0:1)-(b.w===w?0:1)})[0];
+  return ['',greeting(h)+'. The <b>'+WIN[w].toLowerCase()+'</b> window is active. '+(req.length-dn)+' of '+req.length+' required quests remain'+(next?'. Suggested next: <b>'+esc(next.title)+'</b>':'')+'.'];
+}
+
+function viewStatus(){
+  var li=levelInfo(S.xp),r=rankOf(li.L),req=reqQuests(),dn=req.filter(function(q){return isDone(q.id)}).length;
+  var n=notice(),pct=req.length?Math.round(dn/req.length*100):0;
+  var status=panel('Status',
+    '<div class="idrow"><div class="lv"><span class="lvl">'+li.L+'</span><span class="lvt">LEVEL</span></div>'+
+    '<div class="idinfo"><label class="lab" for="nameIn">Hunter name</label><input id="nameIn" class="inp" maxlength="24" value="'+esc(S.name)+'" data-change="name">'+
+    '<dl class="kv"><div><dt>Rank</dt><dd class="rank">'+r+'</dd></div><div><dt>Title</dt><dd>'+titleOf()+'</dd></div><div><dt>Streak</dt><dd>'+S.streak+' d</dd></div><div><dt>Recovery passes</dt><dd>'+S.passes+' / 3</dd></div></dl></div></div>'+
+    '<div class="prog"><div class="bar"><i style="width:'+Math.round(li.rem/li.need*100)+'%"></i></div><span class="mono">'+li.rem+' / '+li.need+' XP</span></div>'+
+    (multNow()>1?'<p class="hint"><span class="chip warn">BONUS x'+multNow()+'</span> XP multiplier is active until midnight.</p>':''));
+  var stats=panel('Attributes',Object.keys(STAT).map(function(k){
+    var v=statVal(k);
+    return '<div class="stat"><div><span class="ab">'+STAT[k].ab+'</span><span class="nm">'+STAT[k].n+'</span></div><div class="bar"><i style="width:'+Math.min(100,Math.round((v-5)/55*100))+'%"></i></div><span class="v">'+v+'</span></div>';
+  }).join('')+'<p class="hint">Attributes rise as you complete quests tied to them. Every 15 XP in a stat adds a point.</p>');
+  var today=panel('Today',
+    '<div class="prog"><div class="bar '+(pct===100?'good':'')+'"><i style="width:'+pct+'%"></i></div><span class="mono">'+dn+'/'+req.length+' required</span></div>'+
+    '<div class="mini"><div><div class="n">'+S.best+'</div><div class="l">Best streak</div></div><div><div class="n">'+S.penCleared+'</div><div class="l">Penalties cleared</div></div><div><div class="n">'+S.goals.filter(function(g){return g.ms.length&&g.ms.every(function(m){return m.done})}).length+'</div><div class="l">Gates cleared</div></div></div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="tab" data-v="quests">Open quests</button>'+(S.lowMode?'<span class="chip warn">LOW-ENERGY MODE</span>':'')+'</div>');
+  var ci=S.checkins[S.checkins.length-1],mind;
+  if(ci){
+    mind=panel('Mental State','<div class="mini"><div><div class="n">'+ci.mood+'</div><div class="l">Mood</div></div><div><div class="n">'+ci.energy+'</div><div class="l">Energy</div></div><div><div class="n">'+ci.stress+'</div><div class="l">Stress</div></div></div><p class="hint">Last check-in: '+fmtT(ci.t)+'.</p><div class="row" style="margin-top:10px"><button class="btn" data-act="tab" data-v="mind">Open Mind</button></div>');
+  }else{
+    mind=panel('Mental State','<p style="margin:0">No check-in yet. A 30-second check-in tracks mood, energy and stress, and the System adapts your difficulty to match.</p><div class="row" style="margin-top:12px"><button class="btn primary" data-act="tab" data-v="mind">Log first check-in</button></div>');
+  }
+  return sysBox(n[1],n[0])+'<div class="grid2"><div>'+status+stats+'</div><div>'+today+raidMini()+mind+'</div></div>';
+}
+
+function qRow(q,dim){
+  var done=isDone(q.id),nowW=!done&&q.w!=='any'&&q.w===winNow();
+  return '<div class="qrow '+(done?'done ':'')+(nowW?'now ':'')+(dim?'dim':'')+'">'+
+    '<button class="chk" data-act="qtoggle" data-id="'+q.id+'" aria-pressed="'+done+'" aria-label="'+(done?'Undo ':'Complete ')+esc(q.title)+'">'+(done?'✓':'')+'</button>'+
+    '<div class="qmain"><div class="qt">'+esc(q.title)+'</div><div class="qd">'+esc(q.desc)+'</div><div class="chips"><span class="chip">'+STAT[q.stat].ab+'</span><span class="chip">'+WIN[q.w]+'</span>'+(nowW?'<span class="chip now">NOW</span>':'')+(dim?'<span class="chip">OPTIONAL TODAY</span>':'')+'</div></div>'+
+    '<div class="qx"><span>+'+q.xp+' XP</span><button class="lnk" data-act="qremove" data-id="'+q.id+'">remove</button></div></div>';
+}
+function viewQuests(){
+  var req=reqQuests(),dn=req.filter(function(q){return isDone(q.id)}).length,pct=req.length?Math.round(dn/req.length*100):0;
+  var vis=S.quests.filter(function(q){return !q.hidden}),ord={am:0,day:1,pm:2,any:3};
+  var srt=function(a,b){return ord[a.w]-ord[b.w]};
+  var reqL=vis.filter(function(q){return req.indexOf(q)>=0}).sort(srt),optL=vis.filter(function(q){return req.indexOf(q)<0}).sort(srt);
+  var hiddenN=S.quests.filter(function(q){return q.hidden}).length;
+  var n=notice();
+  var main=panel('Daily Quests',
+    '<div class="row" style="justify-content:space-between"><div class="segs" role="group" aria-label="Difficulty mode"><button class="seg '+(S.lowMode?'':'on')+'" data-act="mode" data-v="normal" aria-pressed="'+(!S.lowMode)+'">Normal</button><button class="seg '+(S.lowMode?'on':'')+'" data-act="mode" data-v="low" aria-pressed="'+S.lowMode+'">Low-Energy</button></div></div>'+
+    '<div class="prog"><div class="bar '+(pct===100?'good':'')+'"><i style="width:'+pct+'%"></i></div><span class="mono">'+dn+'/'+req.length+' required</span></div>'+
+    '<p class="hint">'+(S.lowMode?'Low-Energy Mode: only the three base quests are required. Everything else is optional XP. Use it on hard days; it is not cheating.':'Normal Mode: base and core quests are required. Bonus quests are extra XP.')+'</p>'+
+    '<div class="sub">Required</div><div class="qlist">'+(reqL.map(function(q){return qRow(q,false)}).join('')||'<p class="hint">No required quests. Restore the defaults below.</p>')+'</div>'+
+    '<div class="sub">Optional</div><div class="qlist">'+(optL.map(function(q){return qRow(q,q.tier==='core')}).join('')||'<p class="hint">Nothing here.</p>')+'</div>'+
+    (hiddenN?'<div class="row" style="margin-top:12px"><button class="btn sm" data-act="qrestore">Restore '+hiddenN+' removed default quest'+(hiddenN>1?'s':'')+'</button></div>':''));
+  var p=openPenalty(),pen;
+  if(p){
+    pen=panel('Penalty Zone',
+      '<div class="card" style="margin-top:0;border-color:#6b2a36"><h3>'+esc(p.title)+'</h3><p style="color:var(--ink)">'+esc(p.desc)+'</p><div class="chips"><span class="chip crit">PENALTY</span><span class="chip">+15 XP when cleared</span><span class="chip">Assigned for '+esc(p.date)+'</span></div><div class="row" style="margin-top:12px"><button class="btn primary" data-act="pclear">Mark cleared</button>'+(p.rerolled?'':'<button class="btn" data-act="preroll">Swap once</button>')+'</div></div>'+
+      '<p class="hint">Penalties here are repair tasks, never self-punishment. No XP is taken. Recovery Passes cancel a miss completely.</p>','pen');
+  }else{
+    pen=panel('Penalty Zone','<p style="margin:0"><span class="chip good">CLEAR</span> No penalty pending.</p><p class="hint">Miss a day and the System assigns one small repair task. No XP is removed. Every 7-day streak earns a Recovery Pass that cancels a miss. Low-Energy Mode lowers the bar on hard days. Penalties cleared so far: '+S.penCleared+'.</p>','pen');
+  }
+  var tmr=S.timer,left=tmr?Math.max(0,tmr.end-Date.now()):0;
+  var focus=panel('Focus Dungeon',
+    '<div class="row" style="justify-content:space-between;align-items:center"><span class="big" id="focusClock">'+(tmr?fmtClock(left):'25:00')+'</span>'+(tmr?'<button class="btn danger" data-act="focusstop">Leave</button>':'<button class="btn primary" data-act="focusstart">Enter 25 min</button>')+'</div>'+
+    '<p class="hint">A 25-minute raid on one task. Clearing it completes the Focus Dungeon quest. The timer keeps running if you close this page.</p>');
+  var add=panel('Add a Quest',
+    '<div class="form"><div><label class="lab" for="qdTitle">Quest name</label><input id="qdTitle" class="inp" maxlength="60" placeholder="e.g. Evening stretch" value="'+esc(UI.qd.title)+'" data-bind="qd.title"></div>'+
+    '<div class="two"><div><label class="lab" for="qdTier">Importance</label><select id="qdTier" class="sel" data-bind="qd.tier">'+opt([['min','Base (always required)'],['core','Core (normal days)'],['bonus','Bonus (extra XP)']],UI.qd.tier)+'</select></div>'+
+    '<div><label class="lab" for="qdStat">Attribute</label><select id="qdStat" class="sel" data-bind="qd.stat">'+opt(Object.keys(STAT).map(function(k){return [k,STAT[k].ab+' '+STAT[k].n]}),UI.qd.stat)+'</select></div>'+
+    '<div><label class="lab" for="qdW">Time window</label><select id="qdW" class="sel" data-bind="qd.w">'+opt(Object.keys(WIN).map(function(k){return [k,WIN[k]]}),UI.qd.w)+'</select></div></div>'+
+    '<div><button class="btn primary" data-act="qadd">Add quest</button></div></div>');
+  return sysBox(n[1],n[0])+'<div class="grid2"><div>'+main+'</div><div>'+pen+focus+add+'</div></div>';
+}
+function opt(list,sel){return list.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===sel?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')}
+function fmtClock(ms){var s=Math.ceil(ms/1000);return pad(Math.floor(s/60))+':'+pad(s%60)}
+
+function viewGates(){
+  var open=S.goals.filter(function(g){return !(g.ms.length&&g.ms.every(function(m){return m.done}))}),cleared=S.goals.filter(function(g){return g.ms.length&&g.ms.every(function(m){return m.done})});
+  var card=function(g){
+    var pct=goalPct(g),due='';
+    if(g.due){var dl=diffDays(dkey(),g.due);due='<span class="chip '+(dl<0?'crit':dl<=7?'warn':'')+'">'+(dl<0?Math.abs(dl)+' d past target':dl===0?'target is today':dl+' d left')+'</span>'}
+    return '<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-start"><h3>'+esc(g.title)+'</h3><button class="lnk" data-act="gdel" data-id="'+g.id+'">delete</button></div>'+
+      '<div class="chips"><span class="chip">'+esc(g.cat.toUpperCase())+'</span>'+(g.example?'<span class="chip warn">EXAMPLE</span>':'')+due+'<span class="chip">+40 XP per milestone</span></div>'+
+      '<div class="prog"><div class="bar '+(pct===100?'good':'')+'"><i style="width:'+pct+'%"></i></div><span class="mono">'+pct+'%</span></div>'+
+      g.ms.map(function(m){return '<div class="ms '+(m.done?'done':'')+'"><button class="chk" data-act="gms" data-id="'+g.id+'" data-m="'+m.id+'" aria-pressed="'+m.done+'" aria-label="'+(m.done?'Undo ':'Complete ')+esc(m.t)+'">'+(m.done?'✓':'')+'</button><span>'+esc(m.t)+'</span></div>'}).join('')+'</div>';
+  };
+  var form=panel('Open a Gate',
+    '<div class="form"><div><label class="lab" for="gdTitle">Goal</label><input id="gdTitle" class="inp" maxlength="80" placeholder="e.g. Sleep by 23:00 on weeknights" value="'+esc(UI.gd.title)+'" data-bind="gd.title"></div>'+
+    '<div class="two"><div><label class="lab" for="gdCat">Category</label><select id="gdCat" class="sel" data-bind="gd.cat">'+opt([['Mind','Mind (SEN)'],['Body','Body (STR)'],['Skill','Skill (INT)'],['Life','Life (AGI)']],UI.gd.cat)+'</select></div>'+
+    '<div><label class="lab" for="gdDue">Target date (optional)</label><input id="gdDue" class="inp" type="date" value="'+esc(UI.gd.due)+'" data-bind="gd.due"></div></div>'+
+    '<div><label class="lab" for="gdMs">Milestones, one per line</label><textarea id="gdMs" class="ta" placeholder="Small, concrete steps work best" data-bind="gd.ms">'+esc(UI.gd.ms)+'</textarea></div>'+
+    '<div><button class="btn primary" data-act="gadd">Open gate</button></div></div>');
+  return '<div class="grid2"><div>'+panel('Active Gates',(open.map(card).join('')||'<p class="hint" style="margin:0">No open gates. Add one on the right. Break a big goal into 3 to 6 milestones.</p>'))+
+    (cleared.length?panel('Cleared',cleared.map(card).join('')):'')+'</div><div>'+form+'</div></div>';
+}
+
+function viewEvents(){
+  var t=dkey(),today=S.events.filter(function(e){return e.date===t}),older=S.events.filter(function(e){return e.date!==t}).slice(0,8);
+  var cd=Math.max(0,S.lastScan+30*60000-Date.now()),cap=today.length>=3;
+  var card=function(e){
+    var chipS={new:'<span class="chip now">NEW</span>',active:'<span class="chip warn">ACTIVE</span>',done:'<span class="chip good">CLEARED</span>',skipped:'<span class="chip">SKIPPED</span>'}[e.status];
+    var act='';
+    if(e.status==='new')act='<button class="btn primary sm" data-act="eaccept" data-id="'+e.id+'">Accept</button><button class="btn sm" data-act="eskip" data-id="'+e.id+'">Skip</button>';
+    else if(e.status==='active')act=(e.kind==='quest'?'<button class="btn primary sm" data-act="edone" data-id="'+e.id+'">Mark cleared</button>':'<span class="mono">Active until midnight</span>')+'<button class="btn sm" data-act="eskip" data-id="'+e.id+'">Drop</button>';
+    return '<div class="card"><h3>'+esc(e.title)+'</h3><p style="color:var(--ink)">'+esc(e.desc)+'</p><div class="chips">'+chipS+'<span class="chip">'+(e.kind==='buff'?'BUFF':'QUEST')+'</span>'+(e.kind==='quest'?'<span class="chip">+'+e.xp+' XP '+STAT[e.stat].ab+'</span>':'')+'</div>'+(act?'<div class="row" style="margin-top:10px">'+act+'</div>':'')+'</div>';
+  };
+  var scan=panel('Event Scanner',
+    '<p style="margin:0">The System rolls one hidden event per day, and you can scan for up to three. Skipping is always free. Events are chances, not obligations.</p><div class="row" style="margin-top:12px"><button class="btn primary" data-act="escan"'+(cd>0||cap?' disabled':'')+'>Scan for event</button><span class="mono">'+(cap?'Three events found today.':cd>0?'Next scan in '+Math.ceil(cd/60000)+' min.':'Scanner ready.')+'</span></div>');
+  return '<div class="grid2"><div>'+panel('Today',(today.map(card).join('')||'<p class="hint" style="margin:0">No events today yet.</p>'))+'</div><div>'+scan+
+    (older.length?panel('Earlier',older.map(function(e){return '<div class="card"><h3>'+esc(e.title)+'</h3><div class="chips"><span class="chip">'+esc(e.date)+'</span><span class="chip '+(e.status==='done'?'good':'')+'">'+e.status.toUpperCase()+'</span></div></div>'}).join('')):'')+'</div></div>';
+}
+
+function viewMind(){
+  var dr=UI.draft,tags=['sleep','work','people','body','worry','calm'];
+  var today=S.checkins.filter(function(c){return c.date===dkey()}),last=today[today.length-1],alerts='';
+  if(last){
+    if(last.mood===1)alerts+=sysBox('Your mood reading is at the lowest level. You do not have to carry that alone. If you feel unsafe or are thinking about hurting yourself, call 112 (EU emergency number) or a local crisis line now, or reach out to someone you trust. <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists lines by country.','crit');
+    if((last.mood<=2||last.energy<=2)&&!S.lowMode)alerts+=sysBox('Low readings detected. Recommended: <b>Low-Energy Mode</b>. Only three base quests are required today, and the streak still counts.','warn','<div class="row"><button class="btn primary sm" data-act="mode" data-v="low">Switch to Low-Energy Mode</button></div>');
+    if(last.stress>=4)alerts+=sysBox('Stress is high. Try the Safe Room below: one round of box breathing takes about a minute.','warn');
+  }
+  var scale=function(k,l1,l2){
+    var b='';for(var i=1;i<=5;i++)b+='<button data-act="pick" data-k="'+k+'" data-v="'+i+'" aria-pressed="'+(dr[k]===i)+'">'+i+'</button>';
+    return '<div style="margin-top:12px"><div class="lab">'+k+'</div><div class="scale">'+b+'</div><div class="scale-l"><span>'+l1+'</span><span>'+l2+'</span></div></div>';
+  };
+  var checkin=panel('Check-in',
+    scale('mood','very low','very good')+scale('energy','drained','energised')+scale('stress','calm','overwhelmed')+
+    '<div style="margin-top:14px"><div class="lab">What is affecting you</div><div class="tagrow">'+tags.map(function(t){return '<button class="tagbtn" data-act="tag" data-v="'+t+'" aria-pressed="'+(dr.tags.indexOf(t)>=0)+'">'+t+'</button>'}).join('')+'</div></div>'+
+    '<div style="margin-top:14px"><label class="lab" for="noteIn">Note (optional)</label><textarea id="noteIn" class="ta" maxlength="500" data-bind="draft.note" placeholder="One line is enough">'+esc(dr.note)+'</textarea></div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="checkin">Log check-in</button><span class="mono">+20 XP for the first one each day</span></div>');
+  var has=S.checkins.length>0;
+  var trend=panel('Trend, 14 days',
+    (has?chartSvg()+'<div class="legend"><span><svg viewBox="0 0 30 8"><line x1="0" y1="4" x2="30" y2="4" stroke="var(--glow)" stroke-width="2"/></svg>Mood</span><span><svg viewBox="0 0 30 8"><line x1="0" y1="4" x2="30" y2="4" stroke="var(--warn)" stroke-width="2" stroke-dasharray="6 4"/></svg>Energy</span><span><svg viewBox="0 0 30 8"><line x1="0" y1="4" x2="30" y2="4" stroke="var(--viol)" stroke-width="2" stroke-dasharray="2 4"/></svg>Stress (higher is harder)</span></div>'+trendLines()
+    :'<p style="margin:0">Your trend appears here after the first check-in. Patterns matter more than any single day: look for what moves your mood up and your stress down.</p>'));
+  var orb=panel('Safe Room: Box Breathing',
+    '<div class="orbwrap"><div class="orb" id="orb" style="'+(breath?'transform:scale('+PH[breath.i][1]+')':'')+'"><div><div class="ol" id="orbL">'+(breath?PH[breath.i][0]:'Ready')+'</div><div class="oc" id="orbC">'+(breath?breath.left:'4')+'</div></div></div></div>'+
+    '<div class="row" style="justify-content:center"><span class="mono" id="orbR">'+(breath?'Cycle '+(breath.c+1)+' of 4':'4 cycles of 4 seconds in, hold, out, hold')+'</span></div>'+
+    '<div class="row" style="justify-content:center;margin-top:12px">'+(breath?'<button class="btn danger" data-act="bstop">Stop</button>':'<button class="btn primary" data-act="bstart">Begin</button>')+'</div>');
+  var gl=['5 things you can see','4 things you can feel','3 things you can hear','2 things you can smell','1 thing you can taste'];
+  var ground=panel('Safe Room: Grounding',
+    '<p style="margin:0;color:var(--mute)">For racing thoughts. Go slowly, name each one out loud or in your head.</p><div class="gr">'+gl.map(function(t,i){return '<label><input type="checkbox" data-act="gr" data-i="'+i+'"'+(UI.gr[i]?' checked':'')+'><span>'+t+'</span></label>'}).join('')+'</div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="grdone"'+(UI.gr.every(Boolean)?'':' disabled')+'>Finish</button><span class="mono">+10 XP</span></div>');
+  var rfList=S.reframes.slice(0,3).map(function(r){return '<div class="card"><p style="margin:0;color:var(--ink)"><b>Thought:</b> '+esc(r.a)+'</p>'+(r.b?'<p><b>Evidence:</b> '+esc(r.b)+'</p>':'')+'<p><b>Kinder view:</b> '+esc(r.c)+'</p><div class="chips"><span class="chip">'+fmtT(r.t)+'</span></div></div>'}).join('');
+  var reframe=panel('Thought Reframe',
+    '<div class="form"><div><label class="lab" for="rfA">The thought</label><textarea id="rfA" class="ta" maxlength="300" data-bind="rf.a" placeholder="e.g. I always mess things up">'+esc(UI.rf.a)+'</textarea></div>'+
+    '<div><label class="lab" for="rfB">Evidence for and against</label><textarea id="rfB" class="ta" maxlength="300" data-bind="rf.b">'+esc(UI.rf.b)+'</textarea></div>'+
+    '<div><label class="lab" for="rfC">A fairer, kinder version</label><textarea id="rfC" class="ta" maxlength="300" data-bind="rf.c" placeholder="What would you say to a friend?">'+esc(UI.rf.c)+'</textarea></div>'+
+    '<div class="row"><button class="btn primary" data-act="rfsave">Save reframe</button><span class="mono">+20 XP</span></div></div>'+rfList);
+  var help=panel('Support','<p style="margin:0">This tracker supports daily habits. It does not replace care from a professional. If things feel unsafe or too heavy, contact someone now: emergency services on <b>112</b> (EU), a doctor, or a crisis line. <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists free lines by country.</p>');
+  return alerts+'<div class="grid2"><div>'+checkin+trend+'</div><div>'+orb+ground+reframe+help+'</div></div>';
+}
+
+function viewLog(){
+  var logp=panel('System Log','<ul class="log">'+S.log.map(function(l){return '<li><time>'+fmtT(l.t)+'</time><span>'+esc(l.m)+'</span></li>'}).join('')+'</ul>');
+  var data=panel('Your Data',
+    '<p style="margin:0;color:var(--mute)">Progress is saved on this device and, where your account allows it, to your account so it follows you across devices.</p>'+
+    '<div class="row" style="margin-top:12px"><button class="btn" data-act="copybk">Copy backup</button></div>'+
+    '<div style="margin-top:12px"><label class="lab" for="bkIn">Backup text</label><textarea id="bkIn" class="ta" data-bind="backup" placeholder="Paste a backup here to restore it">'+esc(UI.backup)+'</textarea></div>'+
+    '<div class="row" style="margin-top:10px"><button class="btn" data-act="restore">Restore from backup</button></div>'+
+    '<div class="row" style="margin-top:18px">'+(UI.confirmReset?'<span class="mono">This erases all progress.</span><button class="btn danger" data-act="resetgo">Yes, reset everything</button><button class="btn" data-act="resetno">Cancel</button>':'<button class="btn danger" data-act="resetask">Reset all progress</button>')+'</div>');
+  return '<div class="grid2"><div>'+logp+'</div><div>'+data+'</div></div>';
+}
+/* football day, exam mode, custom missions, weekly report */
+function allSpecial(){return SPECIAL.concat(S.customSpecial)}
+function dayTypeNow(){return (S.dayType&&S.dayType.date===dkey())?S.dayType.type:'train'}
+function dayPanel(){
+  var t=dayTypeNow(),o=[['train','Training day'],['match','Match day'],['rest','Rest day']];
+  return panel('Football Day','<p style="margin:0;color:var(--mute)">Tell the System what today is. The Home Training mission changes to fit: a full session, light match-day activation, or recovery.</p><div class="tagrow" style="margin-top:10px">'+o.map(function(x){return '<button class="tagbtn" data-act="dtype" data-v="'+x[0]+'" aria-pressed="'+(t===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+(t==='match'?'<p class="hint">After the game, do the Match Review special mission.</p>':''));
+}
+function customForm(){
+  var c=UI.cs;
+  return panel('Add Your Own Mission','<div class="form"><div><label class="lab" for="csT">Mission</label><input id="csT" class="inp" maxlength="70" placeholder="e.g. 20 minutes of sprint drills" value="'+esc(c.title)+'" data-bind="cs.title"></div><div class="two"><div><label class="lab" for="csC">Category</label><select id="csC" class="sel" data-bind="cs.cat">'+opt([['Football','Football'],['Student','Student'],['Life','Life']],c.cat)+'</select></div><div><label class="lab" for="csS">Attribute</label><select id="csS" class="sel" data-bind="cs.stat">'+opt(Object.keys(STAT).map(function(k){return [k,STAT[k].ab+' '+STAT[k].n]}),c.stat)+'</select></div><div><label class="lab" for="csX">Reward</label><select id="csX" class="sel" data-bind="cs.xp">'+opt([['20','Small, 20 XP'],['35','Medium, 35 XP'],['50','Big, 50 XP']],c.xp)+'</select></div><div><label class="lab" for="csR">Repeats</label><select id="csR" class="sel" data-bind="cs.rep">'+opt([['weekly','Every week'],['once','One time']],c.rep)+'</select></div></div><div><button class="btn primary sm" data-act="csadd">Add mission</button></div></div>');
+}
+
+/* special missions and bookshelf */
+function curWeek(){return mondayOf(dkey())}
+function spDone(sp){var r=S.special[sp.id];if(!r)return false;return sp.rep==='once'?r.n>0:r.last>=curWeek()}
+function completeSpecial(id){
+  var sp=allSpecial().find(function(x){return x.id===id});if(!sp||spDone(sp))return;
+  var amt=gain(sp.xp,sp.stat),r=S.special[id]||{n:0,last:''};
+  r.n++;r.last=dkey();S.special[id]=r;
+  addRec('special',sp.title,amt,sp.stat);log('Special mission complete: '+sp.title+'. +'+amt+' XP.');
+  if(sp.sk)skillLog(sp.sk[0],sp.sk[1],true);
+  if(sp.court)chalTick('courage');
+  toast(sp.title+' complete. +'+amt+' XP');save();render();
+}
+function allBooks(){return BOOKS.concat(S.customBooks)}
+function bkState(id){return S.books[id]||{st:'wish',min:0,note:''}}
+function bkSet(id,patch){S.books[id]=Object.assign({st:'wish',min:0,note:''},S.books[id]||{},patch)}
+function bookDone(){return Object.keys(S.books).filter(function(k){return S.books[k].st==='done'}).length}
+function readMin(){return Object.keys(S.books).reduce(function(a,k){return a+(S.books[k].min||0)},0)}
+function viewSpecial(){
+  var cats=[['all','All'],['Football','Football'],['Student','Student'],['Life','Life']];
+  var list=allSpecial().filter(function(s){return UI.sf==='all'||s.cat===UI.sf});
+  var dn=allSpecial().filter(spDone).length;
+  var rows=list.map(function(s){
+    var d1=spDone(s);
+    return '<div class="qrow '+(d1?'m-done':'')+'">'+(d1?'<span class="chk st" style="background:var(--good);border-color:var(--good)">✓</span>':'<span class="chk st off"></span>')+
+      '<div class="qmain"><div class="qt">'+esc(s.title)+'</div><div class="qd">'+esc(s.desc)+'</div><div class="chips"><span class="chip">'+s.cat.toUpperCase()+'</span><span class="chip">'+STAT[s.stat].ab+'</span><span class="chip">'+(s.rep==='once'?'ONE TIME':'WEEKLY')+'</span>'+(d1?'<span class="chip good">'+(s.rep==='once'?'DONE':'DONE, resets Monday')+'</span>':'')+'</div>'+
+      (d1?'':'<div class="row" style="margin-top:8px"><button class="btn primary sm" data-act="spdo" data-id="'+s.id+'">Mark complete</button></div>')+'</div><div class="qx"><span>+'+s.xp+' XP</span>'+(s.custom?'<button class="lnk" data-act="csdel" data-id="'+s.id+'">remove</button>':'')+'</div></div>';
+  }).join('');
+  var sp=panel('Special Missions','<div class="tagrow">'+cats.map(function(c){return '<button class="tagbtn" data-act="sf" data-v="'+c[0]+'" aria-pressed="'+(UI.sf===c[0])+'">'+c[1]+'</button>'}).join('')+'</div><p class="hint">These are not tied to the clock. Do them when they fit your football and study week. Weekly ones reset every Monday. One-time ones are for the big questions.</p><div class="qlist">'+rows+'</div>','','<span class="mono">'+dn+'/'+allSpecial().length+' done</span>');
+  var books=allBooks().map(function(b){
+    var s=bkState(b.id),open=UI.bk.open===b.id,acts='';
+    if(s.st==='wish')acts='<button class="btn sm primary" data-act="bkgot" data-id="'+b.id+'">I got it (+20 XP)</button>';
+    else if(s.st==='owned')acts='<button class="btn sm primary" data-act="bkstart" data-id="'+b.id+'">Start reading</button>';
+    else if(s.st==='reading'){
+      if(open)acts='<div class="form" style="width:100%"><div><label class="lab" for="bkNote">What did you take away? One or two lines</label><textarea id="bkNote" class="ta" maxlength="300" data-bind="bk.note">'+esc(UI.bk.note)+'</textarea></div><div class="row"><button class="btn primary sm" data-act="bkfinsave" data-id="'+b.id+'">Save as finished (+150 XP)</button><button class="btn sm" data-act="bkcancel">Cancel</button></div></div>';
+      else acts='<button class="btn sm" data-act="bklog" data-id="'+b.id+'" data-v="15">+15 min</button><button class="btn sm" data-act="bklog" data-id="'+b.id+'" data-v="30">+30 min</button><button class="btn sm primary" data-act="bkfin" data-id="'+b.id+'">Finished</button>';
+    }
+    var chip={wish:'<span class="chip">WISHLIST</span>',owned:'<span class="chip now">OWNED</span>',reading:'<span class="chip warn">READING</span>',done:'<span class="chip good">FINISHED</span>'}[s.st];
+    return '<div class="card"><h3>'+esc(b.t)+'</h3><p>'+esc(b.a)+'. '+esc(b.d)+'</p><div class="chips">'+chip+'<span class="chip">+'+STAT[b.st].ab+'</span>'+(s.min?'<span class="chip">'+s.min+' min read</span>':'')+'</div>'+(s.st==='done'&&s.note?'<p style="color:var(--ink)">Takeaway: '+esc(s.note)+'</p>':'')+(acts?'<div class="row" style="margin-top:10px">'+acts+'</div>':'')+'</div>';
+  }).join('');
+  var shelf=panel('Book Shelf',
+    '<div class="mini"><div><div class="n">'+bookDone()+'</div><div class="l">Finished</div></div><div><div class="n">'+readMin()+'</div><div class="l">Minutes read</div></div><div><div class="n">'+allBooks().filter(function(b){return bkState(b.id).st==='reading'}).length+'</div><div class="l">Reading now</div></div></div>'+
+    '<p class="hint">Finishing a book gives +150 XP, which raises the matching attribute by 10 points. Reading time earns XP too (shared with the 60 XP daily skill cap). You need at least 120 logged minutes and a short takeaway to finish one. Check your library or an e-library first, and second-hand copies are cheap.</p>'+books+
+    '<div class="form" style="margin-top:14px"><div class="two"><div><label class="lab" for="bkT">Add your own book</label><input id="bkT" class="inp" maxlength="80" placeholder="Title" value="'+esc(UI.bk.title)+'" data-bind="bk.title"></div><div><label class="lab" for="bkA">Author</label><input id="bkA" class="inp" maxlength="60" placeholder="Author" value="'+esc(UI.bk.author)+'" data-bind="bk.author"></div></div><div><button class="btn sm" data-act="bkadd">Add to shelf</button></div></div>');
+  return '<div class="grid2"><div>'+examPanel()+sp+customForm()+'</div><div>'+shelf+'</div></div>';
+}
+/* xp per day, weekly report */
+function dayXp(amt,stat){
+  var d=dkey(),r=S.xpDay[d]||(S.xpDay[d]={x:0,s:{}});
+  r.x=Math.max(0,r.x+amt);if(stat)r.s[stat]=Math.max(0,(r.s[stat]||0)+amt);
+}
+function weekStats(off){
+  var t=dkey(),ds=[],set={};
+  for(var i=0;i<7;i++){var x=addDays(t,-(i+off));ds.push(x);set[x]=1}
+  var xp=0,stat={},best={d:null,x:0};
+  ds.forEach(function(x){
+    var r=S.xpDay[x];if(!r)return;
+    xp+=r.x;if(r.x>best.x)best={d:x,x:r.x};
+    Object.keys(r.s||{}).forEach(function(k){stat[k]=(stat[k]||0)+r.s[k]});
+  });
+  var rc=function(ty,fn){return S.records.filter(function(r){return set[r.date]&&r.type===ty&&(!fn||fn(r))}).length};
+  return {xp:xp,stat:stat,best:best,
+    clear:ds.filter(function(x){return S.dayClear[x]}).length,
+    missions:rc('mission'),special:rc('special'),challenges:rc('challenge'),bosses:rc('boss'),
+    books:rc('book',function(r){return r.title.indexOf('Finished: ')===0}),
+    courage:S.ladder.log.filter(function(l){return set[l.date]}).length,
+    checkins:S.checkins.filter(function(c){return set[c.date]}).length};
+}
+function weeklyReport(){
+  var c=weekStats(0),p=weekStats(7),a=dayAvgs(14),cur=a.slice(7),prev=a.slice(0,7);
+  var mood=avgOf(cur,'m'),moodP=avgOf(prev,'m'),stress=avgOf(cur,'s'),stressP=avgOf(prev,'s'),energy=avgOf(cur,'e');
+  if(c.xp===0&&p.xp===0&&!S.checkins.length)return panel('Weekly Report','<p style="margin:0">Your report appears here once you have a few days of activity. It compares your last 7 days with the 7 before.</p>','','<span class="mono">Last 7 days</span>');
+  var vs=function(x,y,u){if(y==null)return '';var df=Math.round((x-y)*10)/10;return df===0?' (same as the week before)':' ('+(df>0?'up ':'down ')+Math.abs(df)+(u||'')+' on the week before)'};
+  var topK=null,lowK=null,mx=-1,mn=1e9;
+  Object.keys(STAT).forEach(function(k){var v=c.stat[k]||0;if(v>mx){mx=v;topK=k}if(v<mn){mn=v;lowK=k}});
+  var rows='<li><time>XP</time><span>'+c.xp+vs(c.xp,p.xp)+'</span></li>'+
+    '<li><time>Daily quests</time><span>cleared on '+c.clear+' of 7 days</span></li>'+
+    '<li><time>Missions</time><span>'+c.missions+' timed, '+c.special+' special, '+c.challenges+' challenge'+(c.challenges===1?'':'s')+(c.bosses?', '+c.bosses+' boss defeated':'')+'</span></li>'+
+    '<li><time>Courage</time><span>'+c.courage+' ladder step'+(c.courage===1?'':'s')+'</span></li>'+
+    (c.books?'<li><time>Books</time><span>'+c.books+' finished</span></li>':'')+
+    '<li><time>Mood</time><span>'+(mood!=null?mood.toFixed(1)+' / 5'+vs(mood,moodP):'no check-ins yet')+'</span></li>'+
+    (energy!=null?'<li><time>Energy</time><span>'+energy.toFixed(1)+' / 5</span></li>':'')+
+    (stress!=null?'<li><time>Stress</time><span>'+stress.toFixed(1)+' / 5'+vs(stress,stressP)+'</span></li>':'')+
+    (c.best.d?'<li><time>Best day</time><span>'+esc(c.best.d)+' with '+c.best.x+' XP</span></li>':'')+
+    (mx>0?'<li><time>Top stat</time><span>'+STAT[topK].ab+' '+STAT[topK].n+' (+'+mx+' XP)</span></li>':'');
+  var good=[],next=[];
+  if(c.clear>=5)good.push('You cleared your daily quests on '+c.clear+' days.');
+  if(c.missions>=10)good.push('You completed '+c.missions+' timed missions.');
+  if(mood!=null&&moodP!=null&&mood>moodP+0.2)good.push('Your mood is trending up.');
+  if(stress!=null&&stressP!=null&&stress<stressP-0.2)good.push('Your stress went down.');
+  if(c.courage>0)good.push('You took '+c.courage+' courage step'+(c.courage===1?'':'s')+'. That is the hardest training here.');
+  if(c.books>0)good.push('You finished a book.');
+  if(p.xp>0&&c.xp>p.xp)good.push('Your XP is up on the week before.');
+  if(!good.length)good.push('You showed up and kept the record. Every logged day counts.');
+  if(c.checkins<3)next.push('Log a check-in on at least 3 days so your mood trend means something.');
+  if(c.clear<4)next.push('Use Low-Energy Mode on hard days so your streak survives.');
+  if(c.courage===0)next.push('Try one Courage Ladder step. Step 1 is just a nod.');
+  if(stress!=null&&stress>=3.5)next.push('Stress ran high. Do a breathing round before study or matches.');
+  if(!c.missions)next.push('Open Missions and catch the next window.');
+  if(mx>0&&lowK&&lowK!==topK)next.push('Your quietest area was '+STAT[lowK].ab+' '+STAT[lowK].n+'. Pick one mission to lift it.');
+  var li=function(arr){return arr.slice(0,3).map(function(t){return '<li style="margin:4px 0">'+esc(t)+'</li>'}).join('')};
+  return panel('Weekly Report','<ul class="log">'+rows+'</ul><div class="sub">What went well</div><ul style="margin:6px 0 0;padding-left:18px">'+li(good)+'</ul>'+(next.length?'<div class="sub">Focus for next week</div><ul style="margin:6px 0 0;padding-left:18px">'+li(next)+'</ul>':''),'','<span class="mono">Last 7 days</span>');
+}
+
+/* exam mode */
+function examDays(e){return diffDays(dkey(),e.date)}
+function examPhase(n){return n<0?'DONE':n===0?'EXAM DAY':n===1?'THE EVE':n<=7?'FINAL WEEK':n<=21?'DRILL':'BUILD'}
+function examTarget(n){return n<=1?0:n<=21?2:1}
+function examAdvice(n){
+  if(n===0)return 'Eat, breathe slowly for one minute and trust your preparation. Use the same calm routine you would before a match.';
+  if(n===1)return 'Light review for 30 minutes at most, pack your things and sleep early. No cramming.';
+  if(n<=7)return 'Past papers and weak spots only. Protect your sleep and eat properly.';
+  if(n<=21)return 'Practise under pressure. Two blocks a day and one timed past paper each week.';
+  return 'Learn the material. One focused block a day, then test yourself without notes.';
+}
+function nearestExam(){
+  var best=null;
+  S.exams.forEach(function(e){var n=examDays(e);if(n>=0&&(!best||n<examDays(best)))best=e});
+  return best;
+}
+function examNote(){
+  var e=nearestExam();if(!e)return '';
+  var n=examDays(e);if(n>28)return '';
+  return ' Exam in '+n+' day'+(n===1?'':'s')+': '+e.name+'.';
+}
+function examBump(e){
+  if(!e)return;
+  var d=dkey(),tg=examTarget(examDays(e));
+  e.logs=e.logs||{};e.logs[d]=(e.logs[d]||0)+1;
+  if(tg>0&&e.logs[d]===tg){var a=gain(30,'int');log('Exam target met for '+e.name+'. +'+a+' XP.');toast('Exam target met for '+e.name+'. +'+a+' XP')}
+}
+function examPanel(){
+  var d=dkey(),list=S.exams.slice().sort(function(a,b){return a.date<b.date?-1:1});
+  var cards=list.map(function(e){
+    var n=examDays(e),ph=examPhase(n),tg=examTarget(n),done=(e.logs&&e.logs[d])||0;
+    if(n<0)return '<div class="card"><div class="row" style="justify-content:space-between"><h3>'+esc(e.name)+'</h3><button class="lnk" data-act="exdel" data-id="'+e.id+'">remove</button></div><div class="chips"><span class="chip good">SAT</span><span class="chip">'+esc(e.date)+'</span></div></div>';
+    return '<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-start"><h3>'+esc(e.name)+'</h3><button class="lnk" data-act="exdel" data-id="'+e.id+'">remove</button></div>'+
+      '<div class="chips"><span class="chip now">'+ph+'</span><span class="chip '+(n<=7?'warn':'')+'">'+(n===0?'today':n===1?'tomorrow':n+' days left')+'</span><span class="chip">'+esc(e.date)+'</span></div>'+
+      '<p style="color:var(--ink)">'+esc(examAdvice(n))+'</p>'+
+      (tg?'<div class="prog"><div class="bar '+(done>=tg?'good':'')+'"><i style="width:'+Math.min(100,Math.round(done/tg*100))+'%"></i></div><span class="mono">'+done+'/'+tg+' blocks today</span></div><div class="row" style="margin-top:10px"><button class="btn primary sm" data-act="exlog" data-id="'+e.id+'">Log a 25 min study block</button></div>':'<p class="hint">No study target today. Rest is part of the plan.</p>')+'</div>';
+  }).join('');
+  return panel('Exam Mode',
+    '<p style="margin:0;color:var(--mute)">Add an exam and the System sets a daily study target that rises as the date gets closer: 1 block a day when it is far, 2 in the last three weeks, none on the eve. Meeting the target gives +30 XP. Sitting the exam gives +100 XP. Focus Dungeon sessions count automatically.</p>'+cards+
+    '<div class="form" style="margin-top:14px"><div class="two"><div><label class="lab" for="exN">Subject or exam</label><input id="exN" class="inp" maxlength="50" placeholder="e.g. Maths" value="'+esc(UI.ex.name)+'" data-bind="ex.name"></div><div><label class="lab" for="exD">Exam date</label><input id="exD" class="inp" type="date" value="'+esc(UI.ex.date)+'" data-bind="ex.date"></div></div><div><button class="btn sm" data-act="exadd">Add exam</button></div></div>');
+}
+
+function rng(){var a=[];for(var i=0;i<=10;i++)a.push([String(i),String(i)]);return a}
+function tg(k,label,on){return '<button class="btn sm '+(on?'primary':'')+'" data-act="altog" data-v="'+k+'" aria-pressed="'+on+'">'+label+': '+(on?'On':'Off')+'</button>'}
+
+function viewMissions(){
+  var list=MISSIONS.slice().sort(function(x,y){return x.a-y.a});
+  var real=list.filter(function(m){return !m.social});
+  var doneN=real.filter(function(m){return mState(m)==='done'}).length;
+  var act=real.filter(function(m){return mState(m)==='active'});
+  var nxt=real.filter(function(m){return mState(m)==='locked'})[0];
+  var box;
+  if(act.length)box=sysBox('<b>'+act.length+' mission'+(act.length>1?'s are':' is')+' open now:</b> '+act.map(function(m){return esc(m.title)}).join(', ')+'. Each one can only be completed inside its time window.','');
+  else if(nxt)box=sysBox('No mission is open right now. Next: <b>'+esc(nxt.title)+'</b> opens at '+hm(nxt.a)+', in <span data-cd="'+nxt.id+'">'+cdText(nxt.id)+'</span>.','');
+  else box=sysBox('All mission windows for today have closed. Rest well. New missions open from '+hm(real[0].a)+'.','good');
+  var rows=list.map(function(m){
+    var st=mState(m);
+    var left=st==='done'?'<span class="chk st" style="background:var(--good);border-color:var(--good)">✓</span>':'<span class="chk st off"></span>';
+    var chip=st==='done'?'<span class="chip good">DONE</span>':st==='active'?'<span class="chip now">OPEN, ends in <span data-cd="'+m.id+'">'+cdText(m.id)+'</span></span>':st==='locked'?'<span class="chip">LOCKED, opens in <span data-cd="'+m.id+'">'+cdText(m.id)+'</span></span>':'<span class="chip">WINDOW CLOSED, no penalty</span>';
+    var desc=m.social?'Optional. Do your current Courage Ladder step at your own pace. Skipping is always fine.':m.d();
+    var btn='';
+    if(m.social&&st!=='done')btn='<div class="row" style="margin-top:8px"><button class="btn sm" data-act="tab" data-v="skills">Open Courage Ladder</button></div>';
+    else if(!m.social&&st==='active')btn='<div class="row" style="margin-top:8px"><button class="btn primary sm" data-act="mdo" data-id="'+m.id+'">Mark complete</button></div>';
+    return '<div class="qrow m-'+st+'">'+left+'<div class="qmain"><div class="qt">'+esc(m.title)+'</div><div class="qd">'+esc(desc)+'</div><div class="chips"><span class="chip">'+hm(m.a)+' to '+hm(m.b)+'</span>'+chip+'<span class="chip">'+STAT[m.stat].ab+'</span></div>'+btn+'</div><div class="qx"><span>+'+m.xp+' XP</span></div></div>';
+  }).join('');
+  var board=panel('Mission Board','<div class="prog"><div class="bar '+(doneN>=5?'good':'')+'"><i style="width:'+Math.round(doneN/real.length*100)+'%"></i></div><span class="mono">'+doneN+'/'+real.length+' today</span></div><p class="hint">Missions follow the real clock. A mission can only be completed while its window is open. Clear 5 in one day for a +40 XP bonus. A closed window never costs you XP or a streak.</p><div class="qlist">'+rows+'</div>');
+  var A=S.alerts;
+  var alerts=panel('Alerts',
+    '<p style="margin:0;color:var(--mute)">When a mission window opens or a hidden event appears, a System alert pops up on screen with a ring tone and vibration.</p>'+
+    '<div class="row" style="margin-top:12px">'+tg('sound','Sound',A.sound)+tg('vibrate','Vibration',A.vibrate)+tg('wake','Keep screen on',A.wake)+'</div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="altest">Test alert</button></div>'+
+    '<p class="hint">Alerts fire while this page is open and on screen. A web page cannot ring a phone that is locked or has the page closed. For that, set phone alarms at the mission start times: <b>'+real.map(function(m){return hm(m.a)}).join(', ')+'</b>. Tap Test alert once so your phone allows sound. Vibration works on most Android phones and not on iPhone.</p>');
+  return box+'<div class="grid2"><div>'+board+'</div><div>'+dayPanel()+alerts+'</div></div>';
+}
+
+function viewRaids(){
+  var b=S.boss,def=b&&bossDef(b.id),boss='';
+  if(b){
+    var pct=Math.round(b.hp/b.max*100),dl=diffDays(dkey(),addDays(b.week,6));
+    boss=panel('Weekly Boss','<div class="qt" style="font-size:22px">'+esc(def.name)+'</div><div class="chips"><span class="chip '+(b.status==='dead'?'good':'crit')+'">'+(b.status==='dead'?'DEFEATED':'ALIVE')+'</span><span class="chip">'+(b.status==='dead'?'next boss on Monday':dl===0?'last day':dl+' days left')+'</span></div>'+
+      '<div class="prog"><div class="bar crit"><i style="width:'+pct+'%"></i></div><span class="mono">'+b.hp+' / '+b.max+' HP</span></div>'+
+      '<div class="mini"><div><div class="n">'+b.dmg+'</div><div class="l">Damage dealt</div></div><div><div class="n">'+pct+'%</div><div class="l">HP left</div></div><div><div class="n">'+S.bossKills+'</div><div class="l">Bosses beaten</div></div></div>'+
+      '<p class="hint">'+esc(def.hint)+' Every XP you earn this week from missions, quests, gates and practices damages the boss. Nothing you do can hurt you. Defeat it for +120 XP and a trophy in the Hall. A new boss arrives every Monday.</p>');
+  }
+  var act=chalActive(),d=dkey();
+  var activeHtml=act.map(function(c){
+    var df=CH_DEF[c.key];if(!df)return '';
+    var left=diffDays(d,c.end)+1,pct=Math.min(100,Math.round(c.count/df.target*100));
+    var logged=df.mode==='daily'&&c.days[d];
+    var btns=df.manual?(logged?'<span class="chip good">LOGGED TODAY</span>':'<button class="btn primary sm" data-act="chlog" data-id="'+c.id+'">Log today</button>'):'<span class="mono">Counts automatically from Courage Ladder steps</span>';
+    return '<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-start"><h3>'+esc(df.title)+'</h3><button class="lnk" data-act="chquit" data-id="'+c.id+'">quit</button></div><p style="color:var(--ink)">'+esc(df.desc)+'</p><div class="prog"><div class="bar"><i style="width:'+pct+'%"></i></div><span class="mono">'+c.count+'/'+df.target+'</span></div><div class="chips"><span class="chip">'+left+' day'+(left===1?'':'s')+' left</span><span class="chip">+'+df.xp+' XP</span></div><div class="row" style="margin-top:10px">'+btns+'</div></div>';
+  }).join('')||'<p class="hint" style="margin:0">No active challenge. Pick one below. You can run two at once.</p>';
+  var avail=Object.keys(CH_DEF).filter(function(k){return !act.some(function(c){return c.key===k})}).map(function(k){
+    var df=CH_DEF[k];
+    return '<div class="card"><h3>'+esc(df.title)+'</h3><p>'+esc(df.desc)+'</p><div class="chips"><span class="chip">'+df.days+' days</span><span class="chip">+'+df.xp+' XP</span></div><div class="row" style="margin-top:10px"><button class="btn sm" data-act="chstart" data-id="'+k+'"'+(act.length>=2?' disabled':'')+'>Start</button></div></div>';
+  }).join('');
+  var past=S.chals.filter(function(c){return c.status!=='active'}).slice(0,6).map(function(c){
+    var df=CH_DEF[c.key];return df?'<div class="card"><h3>'+esc(df.title)+'</h3><div class="chips"><span class="chip '+(c.status==='done'?'good':'')+'">'+(c.status==='done'?'CLEARED':'EXPIRED, no penalty')+'</span><span class="chip">'+esc(c.start)+'</span></div></div>':'';
+  }).join('');
+  var ch1=panel('Active Challenges',activeHtml+'<p class="hint">Study blocks, skill practice, check-ins, breathing, missions and Courage steps log progress automatically where they apply.</p>');
+  return '<div class="grid2"><div>'+boss+(past?panel('Past Challenges',past):'')+'</div><div>'+ch1+panel('Available Challenges',avail)+'</div></div>';
+}
+
+function viewSkills(){
+  var cur=ladCur(),steps=S.ladder.steps;
+  var drops=S.ladder.log.filter(function(l){return l.before!=null&&l.after!=null});
+  var avgDrop=drops.length?(drops.reduce(function(a,l){return a+(l.before-l.after)},0)/drops.length):null;
+  var stepsHtml=steps.map(function(s,i){
+    var c=ladCount(s.id),open=UI.lad.open===s.id,form;
+    if(open)form='<div class="form" style="margin-top:10px"><div class="two"><div><label class="lab" for="ladB">Anxiety before (0 to 10)</label><select id="ladB" class="sel" data-bind="lad.before">'+opt(rng(),UI.lad.before)+'</select></div><div><label class="lab" for="ladA">Anxiety after (0 to 10)</label><select id="ladA" class="sel" data-bind="lad.after">'+opt(rng(),UI.lad.after)+'</select></div></div><div class="row"><button class="btn primary sm" data-act="ladsave" data-id="'+s.id+'">Save step</button><button class="btn sm" data-act="ladcancel">Cancel</button></div></div>';
+    else form='<div class="row" style="margin-top:8px"><button class="btn sm '+(s.id===cur?'primary':'')+'" data-act="ladopen" data-id="'+s.id+'">I did this step</button></div>';
+    return '<div class="card'+(s.id===cur?' sug':'')+'"><h3>Step '+(i+1)+': '+esc(s.t)+'</h3><p>'+esc(s.s)+'</p><div class="chips">'+(s.id===cur?'<span class="chip now">SUGGESTED NEXT</span>':'')+'<span class="chip '+(c>=2?'good':'')+'">done '+c+' time'+(c===1?'':'s')+'</span></div>'+form+'</div>';
+  }).join('');
+  var hist=S.ladder.log.slice(0,5).map(function(l){
+    var st=steps.find(function(x){return x.id===l.step});
+    return '<li><time>'+fmtT(l.t)+'</time><span>'+esc(st?st.t:'Step')+'. Anxiety '+l.before+' to '+l.after+'.</span></li>';
+  }).join('');
+  var ladder=panel('Courage Ladder',
+    '<p style="margin:0">Graded practice for social anxiety, built from easy to harder. You set the pace. Repeat a step until it feels easier, go back a step on a hard day, and skip freely. Rating your anxiety before and after shows you that it falls with practice.</p>'+
+    (avgDrop!=null?'<div class="mini"><div><div class="n">'+S.ladder.log.length+'</div><div class="l">Steps done</div></div><div><div class="n">'+(avgDrop>0?'-':'')+Math.abs(avgDrop).toFixed(1)+'</div><div class="l">Avg anxiety change</div></div><div><div class="n">'+steps.filter(function(s){return ladCount(s.id)>=2}).length+'/'+steps.length+'</div><div class="l">Steps mastered</div></div></div>':'')+
+    stepsHtml+
+    '<div class="form" style="margin-top:14px"><div><label class="lab" for="ladC">Add your own step</label><input id="ladC" class="inp" maxlength="100" placeholder="Something specific to your day" value="'+esc(UI.lad.custom)+'" data-bind="lad.custom"></div><div><button class="btn sm" data-act="ladadd">Add step</button></div></div>'+
+    (hist?'<div class="sub">Recent</div><ul class="log">'+hist+'</ul>':'')+
+    '<p class="hint">Up to 2 steps a day earn XP. If anxiety feels overwhelming or gets in the way of daily life, a counsellor or doctor can help. Many schools and universities offer free support.</p>');
+  var sod=skillOfDay();
+  var skills=panel('Skills',
+    '<p style="margin:0;color:var(--mute)">Log your practice time. Every 90 minutes is a skill level. Skill of the day: <b style="color:var(--ink)">'+esc(sod.name)+'</b>, used by the Skill Forge mission. Skill XP is capped at 60 a day.</p>'+
+    S.skills.map(function(s){
+      var lvl=skLevel(s),into=(s.min||0)%90;
+      return '<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-start"><h3>'+esc(s.name)+' <span class="chip now">LV '+lvl+'</span></h3>'+(S.skills.length>1?'<button class="lnk" data-act="skdel" data-id="'+s.id+'">remove</button>':'')+'</div><div class="prog"><div class="bar"><i style="width:'+Math.round(into/90*100)+'%"></i></div><span class="mono">'+(s.min||0)+' min total</span></div><div class="row" style="margin-top:10px"><button class="btn sm" data-act="skadd" data-id="'+s.id+'" data-v="10">+10 min</button><button class="btn sm" data-act="skadd" data-id="'+s.id+'" data-v="15">+15 min</button><button class="btn sm" data-act="skadd" data-id="'+s.id+'" data-v="25">+25 min</button></div></div>';
+    }).join('')+
+    '<div class="form" style="margin-top:14px"><div><label class="lab" for="skN">Add a skill</label><input id="skN" class="inp" maxlength="40" placeholder="e.g. Drawing, Maths, Guitar" value="'+esc(UI.sk.name)+'" data-bind="sk.name"></div><div><button class="btn sm" data-act="skcreate">Add skill</button></div></div>');
+  var tips=panel('Student Toolkit',
+    '<div class="card" style="margin-top:0"><h3>Active recall</h3><p>Close the book and write what you remember, then check. It beats rereading.</p></div>'+
+    '<div class="card"><h3>25 and 5</h3><p>25 minutes on one task, 5 minutes off. Use the Focus Dungeon in Quests.</p></div>'+
+    '<div class="card"><h3>Spaced review</h3><p>Revisit new material after 1 day, 3 days and 7 days. Ten minutes each time is enough.</p></div>'+
+    '<div class="card"><h3>Teach it back</h3><p>Explain a topic out loud in simple words, even to an empty room. Gaps show up fast.</p></div>');
+  var plan=panel('No-Gym Week',
+    '<p style="margin:0;color:var(--mute)">The Home Training mission follows this plan. Everything is doable at home with no equipment.</p><ul class="log" style="margin-top:8px">'+[1,2,3,4,5,6,0].map(function(i){return '<li><time>'+DAYN[i].slice(0,3)+(i===new Date().getDay()?' (today)':'')+'</time><span>'+esc(TRAIN[i])+'</span></li>'}).join('')+'</ul>');
+  return '<div class="grid2"><div>'+ladder+'</div><div>'+skills+tips+plan+'</div></div>';
+}
+
+function viewHall(){
+  var li=levelInfo(S.xp),r=rankOf(li.L),ri=RANKS.map(function(x){return x.r}).indexOf(r),nx=RANKS[ri+1];
+  var rankP=panel('Hunter Rank',
+    '<div class="idrow"><div class="lv"><span class="lvl">'+r+'</span><span class="lvt">RANK</span></div><div class="idinfo"><div class="qt" style="font-size:20px">'+esc(RANKS[ri].n)+'</div><p class="hint" style="margin-top:4px">Level '+li.L+'. '+(nx?'Next rank <b>'+nx.r+' ('+esc(nx.n)+')</b> at level '+nx.L+', '+(nx.L-li.L)+' level'+(nx.L-li.L===1?'':'s')+' to go.':'You hold the highest rank. Keep it alive.')+'</p></div></div>'+
+    '<div class="qlist">'+RANKS.map(function(x,i){var got=i<=ri;return '<div class="qrow'+(got?'':' dim')+'" style="grid-template-columns:44px 1fr auto"><span class="lvl" style="font-size:30px;text-shadow:none;color:'+(got?'var(--glow)':'var(--mute)')+'">'+x.r+'</span><div class="qmain"><div class="qt">'+esc(x.n)+'</div><div class="qd">From level '+x.L+'</div></div><span class="chip '+(got?'good':'')+'">'+(got?'REACHED':'LOCKED')+'</span></div>'}).join('')+'</div>');
+  var cnt=function(t){return S.records.filter(function(x){return x.type===t}).length};
+  var totals=panel('Record Book',
+    '<div class="mini"><div><div class="n">'+cnt('mission')+'</div><div class="l">Missions</div></div><div><div class="n">'+cnt('challenge')+'</div><div class="l">Challenges</div></div><div><div class="n">'+S.bossKills+'</div><div class="l">Bosses</div></div></div>'+
+    '<div class="mini"><div><div class="n">'+S.ladder.log.length+'</div><div class="l">Courage steps</div></div><div><div class="n">'+cnt('gate')+'</div><div class="l">Gates</div></div><div><div class="n">'+S.best+'</div><div class="l">Best streak</div></div></div>'+
+    '<div class="mini"><div><div class="n">'+cnt('special')+'</div><div class="l">Special missions</div></div><div><div class="n">'+bookDone()+'</div><div class="l">Books finished</div></div><div><div class="n">'+readMin()+'</div><div class="l">Reading min</div></div></div>');
+  var fl=[['all','All'],['mission','Missions'],['challenge','Challenges'],['boss','Bosses'],['courage','Courage'],['gate','Gates'],['special','Special'],['book','Books']];
+  var recs=S.records.filter(function(x){return UI.hf==='all'||x.type===UI.hf}).slice(0,60);
+  var recP=panel('Accomplished',
+    '<div class="tagrow">'+fl.map(function(f){return '<button class="tagbtn" data-act="hf" data-v="'+f[0]+'" aria-pressed="'+(UI.hf===f[0])+'">'+f[1]+'</button>'}).join('')+'</div>'+
+    (recs.length?'<ul class="log" style="margin-top:10px">'+recs.map(function(x){return '<li><time>'+fmtT(x.t)+'</time><span><b>'+esc(x.title)+'</b> <span class="chip">'+x.type.toUpperCase()+'</span>'+(x.xp?' +'+x.xp+' XP':'')+'</span></li>'}).join('')+'</ul>':'<p class="hint">Nothing here yet. Complete a mission, challenge or boss and it is recorded here.</p>'));
+  return '<div class="grid2"><div>'+weeklyReport()+rankP+totals+'</div><div>'+recP+'</div></div>'+viewLog();
+}
+
+var VIEWS={status:viewStatus,missions:viewMissions,quests:viewQuests,raids:viewRaids,skills:viewSkills,special:viewSpecial,gates:viewGates,events:viewEvents,mind:viewMind,hall:viewHall};
+
+function modalHtml(){
+  var m=UI.modal;if(!m)return '';
+  return '<div class="modal" role="dialog" aria-modal="true" aria-label="Level up"><section class="panel"><header class="ph"><span class="pt">System Notice</span></header><div class="pb center"><div class="sysh">LEVEL UP</div><div class="lvl">'+m.to+'</div><p style="margin:8px 0 0">Level '+m.from+' to level '+m.to+'.</p>'+(m.rank?'<p style="margin:8px 0 0"><span class="chip now">RANK UP</span> You are now rank <b>'+m.rank+'</b>.</p>':'')+'<p class="hint">Growth comes from showing up, not from being perfect.</p><div class="row" style="justify-content:center;margin-top:14px"><button class="btn primary" data-act="closemodal" id="modalOk">Continue</button></div></div></section></div>';
+}
+
+/* ---------- render ---------- */
+function render(){
+  if(UI.view!=='mind')stopBreath(true);
+  $('#app').innerHTML=VIEWS[UI.view]();
+  $('#modal').innerHTML=modalHtml();
+  stampKeys();lastSig=mSig();
+  document.querySelectorAll('.tab').forEach(function(t){if(t.dataset.v===UI.view)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current')});
+  if(UI.modal){var ok=$('#modalOk');if(ok)ok.focus()}
+  else if(lastKey){var n=document.querySelector('[data-key="'+lastKey+'"]');if(n)n.focus({preventScroll:true})}
+  tick(true);
+}
+function keyOf(el){
+  var d=el.dataset;return d.act?d.act+'|'+(d.id||'')+'|'+(d.m||'')+'|'+(d.k||'')+'|'+(d.v||'')+'|'+(d.i||''):null;
+}
+function stampKeys(){
+  document.querySelectorAll('[data-act]').forEach(function(el){el.setAttribute('data-key',keyOf(el))});
+}
+
+/* ---------- actions ---------- */
+function act(a,el){
+  var d=el.dataset;
+  switch(a){
+    case 'tab':UI.view=d.v;lastKey=null;UI.confirmReset=false;render();window.scrollTo(0,0);return;
+    case 'closemodal':UI.modal=null;render();return;
+    case 'qtoggle':toggleQuest(d.id);return;
+    case 'qremove':{
+      var q=S.quests.find(function(x){return x.id===d.id});if(!q)return;
+      if(q.custom)S.quests=S.quests.filter(function(x){return x.id!==d.id});else q.hidden=true;
+      log('Quest removed: '+q.title+'.');recheck();save();render();return;
+    }
+    case 'qrestore':S.quests.forEach(function(q){q.hidden=false});recheck();save();render();return;
+    case 'qadd':{
+      var t=UI.qd.title.trim();if(!t){toast('Give the quest a name first.');return}
+      var xp={min:15,core:25,bonus:20}[UI.qd.tier];
+      S.quests.push({id:'c_'+uid(),title:t,desc:'Custom quest.',stat:UI.qd.stat,xp:xp,tier:UI.qd.tier,w:UI.qd.w,custom:true});
+      log('Quest added: '+t+'.');UI.qd.title='';recheck();save();render();return;
+    }
+    case 'mode':
+      S.lowMode=d.v==='low';
+      log(S.lowMode?'Low-Energy Mode on. Only base quests are required.':'Normal Mode on.');
+      toast(S.lowMode?'Low-Energy Mode on. Be gentle with yourself.':'Normal Mode on.');
+      recheck();save();render();return;
+    case 'pclear':{
+      var p=openPenalty();if(!p)return;
+      p.status='done';S.penCleared++;var g=gain(15,'agi');
+      log('Penalty cleared: '+p.title+'. +'+g+' XP. Repair complete.');toast('Penalty cleared. +'+g+' XP');save();render();return;
+    }
+    case 'preroll':{
+      var pp=openPenalty();if(!pp||pp.rerolled)return;
+      var c=PEN_POOL.filter(function(x){return x.title!==pp.title}),n=pick(c);
+      pp.title=n.title;pp.desc=n.desc;pp.rerolled=true;log('Penalty swapped to: '+n.title+'.');save();render();return;
+    }
+    case 'focusstart':startFocus();return;
+    case 'focusstop':stopFocus();return;
+    case 'gadd':{
+      var title=UI.gd.title.trim();if(!title){toast('Give the goal a name first.');return}
+      var ms=UI.gd.ms.split('\n').map(function(s){return s.trim()}).filter(Boolean).slice(0,12);
+      if(!ms.length)ms=['Take the first small step'];
+      S.goals.unshift({id:uid(),title:title,cat:UI.gd.cat,created:dkey(),due:UI.gd.due||'',bonus:0,ms:ms.map(function(t){return {id:uid(),t:t.slice(0,120),done:false,xp:0}})});
+      log('Gate opened: '+title+'.');UI.gd={title:'',cat:UI.gd.cat,ms:'',due:''};save();render();return;
+    }
+    case 'gms':toggleMs(d.id,d.m);return;
+    case 'gdel':{
+      var gg=S.goals.find(function(x){return x.id===d.id});S.goals=S.goals.filter(function(x){return x.id!==d.id});
+      if(gg)log('Gate removed: '+gg.title+'.');save();render();return;
+    }
+    case 'escan':{
+      var left=S.lastScan+30*60000-Date.now(),cnt=S.events.filter(function(e){return e.date===dkey()}).length;
+      if(left>0||cnt>=3)return;
+      S.lastScan=Date.now();var e=rollEvent(false);
+      toast(e?'Event found: '+e.title:'No new events right now.');save();render();return;
+    }
+    case 'eaccept':{
+      var ev=S.events.find(function(x){return x.id===d.id});if(!ev)return;
+      ev.status='active';
+      if(ev.kind==='buff'){S.buff={date:dkey(),mult:ev.mult};toast('Bonus x'+ev.mult+' active until midnight.')}
+      log('Event accepted: '+ev.title+'.');save();render();return;
+    }
+    case 'edone':{
+      var e2=S.events.find(function(x){return x.id===d.id});if(!e2||e2.status!=='active')return;
+      e2.status='done';var ga=gain(e2.xp,e2.stat);log('Event cleared: '+e2.title+'. +'+ga+' XP.');toast('Event cleared. +'+ga+' XP');save();render();return;
+    }
+    case 'eskip':{
+      var e3=S.events.find(function(x){return x.id===d.id});if(!e3)return;
+      if(e3.kind==='buff'&&S.buff&&S.buff.date===e3.date)S.buff=null;
+      e3.status='skipped';log('Event skipped: '+e3.title+'. No penalty.');save();render();return;
+    }
+    case 'pick':UI.draft[d.k]=Number(d.v);render();return;
+    case 'tag':{var i=UI.draft.tags.indexOf(d.v);if(i>=0)UI.draft.tags.splice(i,1);else UI.draft.tags.push(d.v);render();return}
+    case 'checkin':addCheckin();return;
+    case 'bstart':startBreath();render();paintBreath();return;
+    case 'bstop':stopBreath(false);return;
+    case 'gr':UI.gr[Number(d.i)]=el.checked;{var b=$('[data-act="grdone"]');if(b)b.disabled=!UI.gr.every(Boolean)}return;
+    case 'grdone':if(!UI.gr.every(Boolean))return;UI.gr=[false,false,false,false,false];toolAward(10,'Grounding');save();render();return;
+    case 'rfsave':{
+      var r=UI.rf;if(!r.a.trim()||!r.c.trim()){toast('Add the thought and a fairer version first.');return}
+      S.reframes.unshift({id:uid(),t:Date.now(),a:r.a.trim().slice(0,300),b:r.b.trim().slice(0,300),c:r.c.trim().slice(0,300)});
+      if(S.reframes.length>30)S.reframes.length=30;
+      UI.rf={a:'',b:'',c:''};toolAward(20,'Thought reframe');save();render();return;
+    }
+    case 'copybk':{
+      var txt=JSON.stringify(S);
+      var fallback=function(){UI.backup=txt;render();var ta=$('#bkIn');if(ta){ta.focus();ta.select()}toast('Copy blocked. The backup is in the box; select and copy it.')};
+      try{navigator.clipboard.writeText(txt).then(function(){toast('Backup copied to clipboard.')},fallback)}catch(err){fallback()}
+      return;
+    }
+    case 'restore':{
+      try{var o=JSON.parse(UI.backup);if(!o||o.v!==1||!Array.isArray(o.quests))throw new Error('bad');
+        S=normalize(o);UI.backup='';ensureBoss();log('Progress restored from backup.');recheck();save();render();toast('Backup restored.');
+      }catch(err){toast('That text is not a valid backup.')}
+      return;
+    }
+    case 'resetask':UI.confirmReset=true;render();return;
+    case 'resetno':UI.confirmReset=false;render();return;
+    case 'resetgo':S=defaultState();ensureBoss();checkSchedule();UI.confirmReset=false;UI.modal=null;save();render();toast('Progress reset. A fresh start.');return;
+    case 'bgo':UI.view=d.v;UI.banner=null;paintBanner();lastKey=null;render();window.scrollTo(0,0);return;
+    case 'bclose':UI.banner=null;paintBanner();return;
+    case 'mdo':completeMission(d.id);return;
+    case 'altog':S.alerts[d.v]=!S.alerts[d.v];if(S.alerts.sound)unlockAudio();if(d.v==='wake')setWake(S.alerts.wake);save();render();return;
+    case 'altest':unlockAudio();showBanner('Test alert','This is how a new mission will look and sound.','missions');return;
+    case 'chstart':{
+      if(chalActive().length>=2){toast('Two challenges at a time is the limit.');return}
+      var cdf=CH_DEF[d.id];if(!cdf)return;
+      S.chals.unshift({id:uid(),key:d.id,start:dkey(),end:addDays(dkey(),cdf.days-1),days:{},count:0,status:'active'});
+      log('Challenge started: '+cdf.title+'.');toast('Challenge started: '+cdf.title);save();render();return;
+    }
+    case 'chlog':{
+      var ch1=S.chals.find(function(x){return x.id===d.id});if(!ch1||ch1.status!=='active')return;
+      var cdf2=CH_DEF[ch1.key],kk=dkey();
+      if(cdf2.mode==='daily'){if(ch1.days[kk])return;ch1.days[kk]=1;ch1.count++}else ch1.count++;
+      chalCheck(ch1);save();render();return;
+    }
+    case 'chquit':S.chals=S.chals.filter(function(x){return x.id!==d.id});log('Challenge dropped. No penalty.');save();render();return;
+    case 'ladopen':UI.lad.open=d.id;UI.lad.before='5';UI.lad.after='5';render();return;
+    case 'ladcancel':UI.lad.open=null;render();return;
+    case 'ladsave':ladSave(d.id);return;
+    case 'ladadd':{
+      var ltx=UI.lad.custom.trim();if(!ltx){toast('Describe the step first.');return}
+      S.ladder.steps.push({id:'lc_'+uid(),t:ltx.slice(0,100),s:'Your own step. Pick a size that feels challenging but doable.',custom:1});
+      UI.lad.custom='';save();render();return;
+    }
+    case 'skadd':skillLog(d.id,Number(d.v),false);save();render();return;
+    case 'skcreate':{
+      var snm=UI.sk.name.trim();if(!snm){toast('Name the skill first.');return}
+      if(S.skills.length>=10){toast('Ten skills is the limit.');return}
+      S.skills.push({id:'c_'+uid(),name:snm.slice(0,40),min:0});UI.sk.name='';save();render();return;
+    }
+    case 'skdel':if(S.skills.length>1){S.skills=S.skills.filter(function(x){return x.id!==d.id});save();render()}return;
+    case 'hf':UI.hf=d.v;render();return;
+    case 'sf':UI.sf=d.v;render();return;
+    case 'dtype':S.dayType={date:dkey(),type:d.v};log('Football day set: '+d.v+'.');save();render();return;
+    case 'csadd':{
+      var cst=UI.cs.title.trim();if(!cst){toast('Name the mission first.');return}
+      if(S.customSpecial.length>=15){toast('Fifteen own missions is the limit.');return}
+      S.customSpecial.push({id:'cs_'+uid(),cat:UI.cs.cat,title:cst.slice(0,70),desc:'Your own mission.',stat:UI.cs.stat,xp:Number(UI.cs.xp)||35,rep:UI.cs.rep,custom:1});
+      UI.cs.title='';save();render();return;
+    }
+    case 'csdel':S.customSpecial=S.customSpecial.filter(function(x){return x.id!==d.id});save();render();return;
+    case 'exadd':{
+      var exn=UI.ex.name.trim(),exd=UI.ex.date;
+      if(!exn){toast('Enter the subject or exam name first.');return}
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(exd)||exd<dkey()){toast('Pick an exam date from today onward.');return}
+      if(S.exams.length>=6){toast('Six exams at a time is the limit.');return}
+      S.exams.push({id:uid(),name:exn.slice(0,50),date:exd,logs:{},done:false});
+      log('Exam added: '+exn+' on '+exd+'.');UI.ex={name:'',date:''};save();render();return;
+    }
+    case 'exdel':S.exams=S.exams.filter(function(x){return x.id!==d.id});save();render();return;
+    case 'exlog':{
+      var exe=S.exams.find(function(x){return x.id===d.id});if(!exe||examDays(exe)<0)return;
+      skillLog('study',25,false);examBump(exe);autoMission('m_study');save();render();return;
+    }
+    case 'spdo':completeSpecial(d.id);return;
+    case 'bkgot':{
+      var bg=allBooks().find(function(x){return x.id===d.id});if(!bg||bkState(d.id).st!=='wish')return;
+      bkSet(d.id,{st:'owned'});var gx=gain(20,bg.st);addRec('book','Got the book: '+bg.t,gx,bg.st);
+      log('Book acquired: '+bg.t+'. +'+gx+' XP.');toast('You got '+bg.t+'. +'+gx+' XP');save();render();return;
+    }
+    case 'bkstart':{var bs=allBooks().find(function(x){return x.id===d.id});if(!bs)return;bkSet(d.id,{st:'reading'});log('Started reading: '+bs.t+'.');save();render();return}
+    case 'bklog':{
+      var bl=allBooks().find(function(x){return x.id===d.id});if(!bl)return;
+      var bm=Number(d.v);bkSet(d.id,{min:(bkState(d.id).min||0)+bm});skillLog('read',bm,false);
+      log('Read '+bm+' minutes of '+bl.t+'.');save();render();return;
+    }
+    case 'bkfin':UI.bk.open=d.id;UI.bk.note='';render();return;
+    case 'bkcancel':UI.bk.open=null;render();return;
+    case 'bkfinsave':{
+      var bf=allBooks().find(function(x){return x.id===d.id});if(!bf)return;
+      var bst=bkState(d.id);
+      if((bst.min||0)<120){toast('Log at least 120 minutes of reading first. You have '+(bst.min||0)+'.');return}
+      if(UI.bk.note.trim().length<5){toast('Write one or two lines about what you took away.');return}
+      var sb=statVal(bf.st),gf=gain(150,bf.st),sa=statVal(bf.st);
+      bkSet(d.id,{st:'done',note:UI.bk.note.trim().slice(0,300)});
+      addRec('book','Finished: '+bf.t,gf,bf.st);
+      log('Book finished: '+bf.t+'. +'+gf+' XP, +'+(sa-sb)+' '+STAT[bf.st].ab+'.');
+      toast('Book finished: '+bf.t+'. +'+gf+' XP and +'+(sa-sb)+' '+STAT[bf.st].ab);
+      showBanner('Book finished',bf.t+' is on your record. +'+(sa-sb)+' '+STAT[bf.st].ab+'.','special');
+      UI.bk.open=null;save();render();return;
+    }
+    case 'bkadd':{
+      var bt=UI.bk.title.trim();if(!bt){toast('Enter the book title first.');return}
+      if(S.customBooks.length>=10){toast('Ten own books is the limit.');return}
+      S.customBooks.push({id:'cb_'+uid(),t:bt.slice(0,80),a:UI.bk.author.trim().slice(0,60)||'Unknown author',st:'int',d:'Your own pick.',custom:1});
+      UI.bk.title='';UI.bk.author='';save();render();return;
+    }
+  }
+}
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');if(!el)return;
+  if(el.tagName==='INPUT'&&el.type==='checkbox')return;
+  lastKey=el.getAttribute('data-key');
+  act(el.dataset.act,el);
+});
+document.addEventListener('change',function(e){
+  var el=e.target;
+  if(el.dataset&&el.dataset.act==='gr'){act('gr',el);return}
+  if(el.dataset&&el.dataset.change==='name'){S.name=el.value.trim().slice(0,24)||'Player';log('Name set to '+S.name+'.');save()}
+});
+document.addEventListener('input',function(e){
+  var el=e.target,p=el.dataset&&el.dataset.bind;if(!p)return;
+  var parts=p.split('.');
+  if(parts.length===2)UI[parts[0]][parts[1]]=el.value;else UI[parts[0]]=el.value;
+});
+
+/* ---------- clock ---------- */
+function tick(force){
+  var n=new Date();
+  var c=$('#clock');if(c)c.textContent=pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
+  var dt=$('#dateTxt');if(dt)dt.textContent=n.toLocaleDateString([], {weekday:'short',day:'numeric',month:'short'});
+  var mid=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1),ms=mid-n,r=$('#resetIn');
+  if(r)r.textContent=Math.floor(ms/3600000)+'h '+pad(Math.floor(ms%3600000/60000))+'m';
+  if(force)return;
+  if(dkey()!==curDay){curDay=dkey();evaluate();ensureBoss();checkSchedule();recheck();save();render();return}
+  if(S.timer){
+    if(Date.now()>=S.timer.end){checkFocus();return}
+    var f=$('#focusClock');if(f)f.textContent=fmtClock(S.timer.end-Date.now());
+  }
+  checkSchedule();updateCountdowns();
+}
+
+/* ---------- boot ---------- */
+var started=false;
+function boot(){
+  evaluate();ensureBoss();checkSchedule();recheck();
+  if(S.timer&&Date.now()>=S.timer.end)checkFocus();
+  save();render();
+  started=true;
+}
+boot();
+setInterval(function(){tick(false)},1000);
+initDb();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build the app
+        run: gradle assembleDebug --no-daemon
+      - name: Keep a copy with the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: HunterSystem-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Publish a download link
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk HunterSystem.apk
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest HunterSystem.apk --title "Hunter System" --notes "Download HunterSystem.apk on your phone and tap it to install."

@@ -1,0 +1,37 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.hunter.system'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.hunter.system'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    // A fixed key, so a newer build installs over the old one and keeps your progress.
+    signingConfigs {
+        debug {
+            storeFile file('hunter.keystore')
+            storePassword 'hunter123'
+            keyAlias 'hunter'
+            keyPassword 'hunter123'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
